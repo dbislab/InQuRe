@@ -12,6 +12,7 @@ __pycache__
 
 # DuckDB database
 *.db
+!/query_rewriting/resources/spider_with_prefixes.db
 
 # Python venv
 venv/
