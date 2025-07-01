@@ -27,9 +27,9 @@ reproducibility: bool = False # Should be left as is
 # The following variables are given to methods as parameters,
 # but are still here for configuration without the command line
 # The number of alternative queries produced during the rewrite
-num_alternatives: int = 1
+num_alternatives: int = 5
 # The number of returned (and ranked) result queries
-num_results: int = 1
+num_results: int = 5
 # The algorithm used for pre-filtering the tables before the prompt (1 for simple Word2Vec)
 prefilter_kind: int = 1
 # The algorithm used for rewriting (1 for simple rewrite prompt)
