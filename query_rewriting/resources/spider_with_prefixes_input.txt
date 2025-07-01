@@ -1,0 +1,49 @@
+SQL
+SELECT best_team FROM baseball;
+
+SQL
+SELECT count(*) FROM college_students;
+
+SQL
+SELECT meeting_id, start_time, end_time, duration
+FROM advertising_agencies_Meetings;
+
+SQL
+SELECT full_student_name, pet_name
+FROM students_and_pets
+WHERE pet_type = 'Cat';
+
+SQL
+SELECT school_name, total_budget, budgeted_money, invested_money
+FROM school_finance
+WHERE year = '2024';
+
+SQL
+SELECT book_name
+FROM books
+WHERE length > 500
+ORDER BY customer_review DESC;
+
+SQL
+SELECT full_actor_name
+FROM actors
+WHERE EXISTS (SELECT *
+              FROM film f JOIN actors_films a ON f.ID = a.film_ID
+              WHERE title LIKE '%study%' AND a.actorID = actors.ID);
+
+SQL
+SELECT a.author_id, a.author_name, COUNT(b.book_id) as total_sales
+FROM authors a JOIN book_orders b ON a.author_id = b.book_author
+WHERE a.author_name LIKE 'M%' AND b.purchase_date > '2020-01-01'
+GROUP BY a.author_id, a.author_name
+ORDER BY total_sales DESC;
+
+SQL
+SELECT district, attractiveness
+FROM city
+ORDER BY attractiveness DESC;
+
+SQL
+SELECT Group_ID,
+       RANK() OVER (PARTITION BY region ORDER BY popularity)
+FROM drama_workshop_groups;

@@ -1,0 +1,3 @@
+"""
+Initialisation file tests
+"""
