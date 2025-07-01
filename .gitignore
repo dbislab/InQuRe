@@ -1,0 +1,51 @@
+# IntelliJ/PyCharm project files
+.idea
+*.iml
+out
+gen
+/logs/
+/target/
+/data/*
+!/data/evaluation/
+.DS_Store
+__pycache__
+
+# DuckDB database
+*.db
+
+# Python venv
+venv/
+
+#Latex files
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+*.pdf
+*.loa
+*.nav
+*.snm
+*.vrb
+*.lol
+
+#Libre Office
+.~lock*
