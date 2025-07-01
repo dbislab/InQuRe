@@ -1,0 +1,3 @@
+## InQuRe - The Case for Intent-Based Query Rewriting
+
+...no description yet...
