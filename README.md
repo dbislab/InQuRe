@@ -13,7 +13,7 @@ Python version: 3.12.5
 Requirements: Found in requirements.txt  
 Main Packages:
 
-- openai (for GPT)
+- openai (for GPT) 
 - duckdb (as DB)
 - sentence-transformers (for embeddings)
 - nltk (as a toolkit to try out things, [Info on data](https://www.nltk.org/install.html))
