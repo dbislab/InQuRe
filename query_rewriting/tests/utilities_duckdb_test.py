@@ -23,7 +23,7 @@ class TestUtilitiesDuckDB(unittest.TestCase):
         con.execute("SELECT * FROM tbl;")
         res: list[list] = get_result_with_column_names(con)
         self.assertEqual(res[0], ["i", "j"])
-        self.assertCountEqual(res, [["i", "j"], (1, 'one'), (2, 'two')])
+        self.assertCountEqual(res, [["i", "j"], [1, 'one'], [2, 'two']])
         con.sql("DROP TABLE tbl;")
         con.close()
 

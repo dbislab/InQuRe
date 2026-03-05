@@ -33,7 +33,7 @@ class TestExecutionMethods(unittest.TestCase):
         self.assertEqual(result, [])
         executable, res_list = check_query_execution("SELECT i FROM tbl;", True)
         self.assertTrue(executable)
-        self.assertEqual(res_list, [['i'], (1,)])
+        self.assertEqual(res_list, [['i'], [1]])
 
     def test_check_query_execution_correction(self):
         """
@@ -59,7 +59,7 @@ class TestExecutionMethods(unittest.TestCase):
         self.assertTrue(error_msg.startswith("Parser Error"))
         executable, result, correctable, error_msg = get_error_message_or_result("SELECT i FROM tbl;", True)
         self.assertTrue(executable)
-        self.assertEqual(result, [['i'], (1,)])
+        self.assertEqual(result, [['i'], [1]])
         self.assertTrue(correctable)
         self.assertTrue(error_msg == "")
 
