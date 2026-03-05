@@ -23,7 +23,7 @@ Main Packages:
 Downloads:
 
 - nltk wordnet is downloaded during the tests for synonyms and antonyms
-- en_core_web_lg
+- en_core_web_lg (python -m spacy download en_core_web_lg)
 
 ### Virtual environment
 

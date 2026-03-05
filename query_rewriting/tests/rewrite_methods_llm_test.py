@@ -8,6 +8,7 @@ from string import ascii_uppercase, digits
 
 from query_rewriting.rewrite_generator.prefilter_tables_llm import get_tables_in_slices_for_llm_call, \
     find_similar_tables, tokenize_and_stem
+import query_rewriting.config as config
 
 
 class TestRewriteMethodsLLM(unittest.TestCase):
@@ -47,6 +48,8 @@ class TestRewriteMethodsLLM(unittest.TestCase):
         """
         Test the case when multiple slices of the tables is created.
         """
+        saved_conf_model = config.gpt_model
+        config.gpt_model = 'gpt-4o'
         schema: dict = dict()
         for i in range(0, 1000):
             key: str = ''.join(choices(ascii_uppercase + digits, k=48))
@@ -77,6 +80,7 @@ class TestRewriteMethodsLLM(unittest.TestCase):
         for table in last_tables:
             schema.pop(table)
         self.assertEqual(schema, dict())
+        config.gpt_model = saved_conf_model
 
     def test_find_similar_tables(self):
         """

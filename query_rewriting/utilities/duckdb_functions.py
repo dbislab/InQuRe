@@ -1,7 +1,7 @@
 """
 Utilities used for queries on DuckDB.
 """
-from duckdb.duckdb import DuckDBPyConnection
+from duckdb import DuckDBPyConnection
 import duckdb
 
 import query_rewriting.config as config
@@ -17,7 +17,8 @@ def get_result_with_column_names(connection: DuckDBPyConnection) -> list[list]:
     :rtype: list[list]
     """
     description: list = connection.description
-    results: list[list] = connection.fetchall()
+    results_tuples: list[tuple] = connection.fetchall()
+    results: list[list] = [list(t) for t in results_tuples]
     cleaned_columns: list = []
     for column in description:
         cleaned_columns.append(column[0])

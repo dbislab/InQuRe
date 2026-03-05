@@ -309,7 +309,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                         if error_messages[rank] == "":
                             print("\tResults:")
                             print("\t\t", end="")
-                            print(*query_results[rank], sep='\n\t\t')
+                            print(*query_results[rank][:10], sep='\n\t\t')
                         else:
                             print("\tQuery was not executable after correction. The following error occurred:")
                             print(f"\t\t{error_messages[rank]}")

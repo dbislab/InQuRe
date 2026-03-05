@@ -126,6 +126,8 @@ class TestRewriteMethodsSummaries(unittest.TestCase):
         """
         Test the case when multiple slices of the tables is created.
         """
+        saved_conf_model = config.gpt_model
+        config.gpt_model = "gpt-4o"
         create_statements: dict = dict()
         tables: list[str] = []
         for i in range(0, 1000):
@@ -177,4 +179,5 @@ class TestRewriteMethodsSummaries(unittest.TestCase):
         for table in last_tables:
             create_statements2.pop(table)
         self.assertEqual(create_statements2, dict())
+        config.gpt_model = saved_conf_model
 

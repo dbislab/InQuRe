@@ -35,7 +35,7 @@ prefilter_kind: int = 1
 # The algorithm used for rewriting (1 for simple rewrite prompt)
 rewrite_kind: int = 1
 # The algorithm used for ranking (1 for simple string distance and MMR)
-ranker_kind: int = 2
+ranker_kind: int = 1
 
 # The following variables are here to be consistently used in the whole project
 # The output length available for gpt-4o and gpt-4o-mini (in tokens)
@@ -52,11 +52,11 @@ db_metadata_table_name: str = 'Metadata'
 db_reproducibility_addition: str = '_reproducibility'
 # Name of the table for reproducibility of LLM outputs
 db_reproducibility_table_name: str = 'LLMOutputs'
-# Names and types of the columns in the metadata table (topics and keywords are comma seperated strings)
+# Names and types of the columns in the metadata table (topics and keywords are comma separated strings)
 # First column has to be the table name, order is relevant for pre-filtering via table summaries
 db_metadata_column_names_and_types: list[str] = ['table_name VARCHAR PRIMARY KEY', 'nl_description VARCHAR',
                                                  'topics VARCHAR', 'keywords VARCHAR']
-# Names of the columns in the metadata table (topics and keywords are comma seperated strings)
+# Names of the columns in the metadata table (topics and keywords are comma separated strings)
 db_metadata_column_names: list[str] = ['table_name', 'nl_description', 'topics', 'keywords']
 # Name of the used sentence-embedder
 sentence_embedder: str = "sentence-transformers/multi-qa-mpnet-base-cos-v1"
