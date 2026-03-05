@@ -70,7 +70,7 @@ def check_for_summaries(db_tables: dict, metadata_db_path: str) -> list[str]:
          f"({", ".join(config.db_metadata_column_names_and_types)});")
     # print(create_statement)
     con.execute(create_statement)
-    tables: list[str] = con.execute(f"SELECT * FROM {config.db_metadata_table_name}").fetchall()
+    tables: list[tuple] = con.execute(f"SELECT * FROM {config.db_metadata_table_name}").fetchall()
     con.close()
     # Maybe also check if there is something actually written in the columns
     #  -> always written together, so should be ok
@@ -357,7 +357,7 @@ def compare_tables_and_query(input_query: str, db_tables: dict, metadata_db_path
     query_summary, query_topics, query_keywords = get_query_info(input_query)
     # Get the tables infos (all tables should have metadata at this point)
     con = duckdb.connect(metadata_db_path)
-    tables: list[str] = con.execute(f"SELECT * FROM {config.db_metadata_table_name}").fetchall()
+    tables: list[tuple[str,str,str,str]] = con.execute(f"SELECT * FROM {config.db_metadata_table_name}").fetchall()
     con.close()
     all_tables_in_db: list[str] = list(db_tables.keys())
     tables_found_via_summary: int = 0

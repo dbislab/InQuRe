@@ -109,7 +109,7 @@ def strip_sql_output(gpt_response: str) -> str:
     sql: str = gpt_response.strip()
     # Strip starting and ending formatting
     sql = sql.strip("`")
-    # Strip the sql tag at the start
+    # Strip the SQL tag at the start
     sql = sql.removeprefix("sql")
     sql = sql.strip()
     # Remove all whitespaces etc.
@@ -132,7 +132,7 @@ def strip_code_block_output(gpt_response: str) -> str:
     code: str = gpt_response.strip()
     # Strip starting and ending formatting
     code = code.strip("`")
-    # Strip the sql tag at the start
+    # Strip the SQL tag at the start
     code = code.removeprefix("sql")
     code = code.removeprefix("css")
     code = code.removeprefix("plaintext")

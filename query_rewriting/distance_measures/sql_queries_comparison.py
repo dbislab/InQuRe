@@ -130,7 +130,7 @@ def difflib_simple_comparison(input_query1: str, input_query2: str) -> float:
 # prompts tested
 def llm_intent_similarity_measure(input_query: str, alternative_queries: list[str]) -> list[float]:
     """
-    Calculate the similarity of a SQl query to a bunch of alternative queries using an LLM.
+    Calculate the similarity of a SQL query to a bunch of alternative queries using an LLM.
     The LLM is asked to give similarity values between 0 and 1 based on the intent of the queries.
 
     :param str input_query: The query to compare to all others
@@ -225,7 +225,7 @@ def llm_intent_similarity_measure(input_query: str, alternative_queries: list[st
 # prompts tested
 def llm_intent_and_embedding_similarity(input_query: str, alternative_queries: list[str]) -> list[float]:
     """
-    Calculate the similarity of a SQl query to a bunch of alternative queries using an LLM.
+    Calculate the similarity of a SQL query to a bunch of alternative queries using an LLM.
     The LLM is asked for intents of the queries, which are then compared using embeddings.
 
     :param str input_query: The query to compare to all others

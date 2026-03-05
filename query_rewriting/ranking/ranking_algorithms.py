@@ -115,7 +115,7 @@ def simple_ranker(input_request: str, alternative_queries: list[str],
     # Otherwise: Calculate the similarities to the original query
     if len(alternative_queries) == 1 and output_length == 1:
         return alternative_queries
-    similarities: list[(str, float)] = []
+    similarities: list[tuple[str, float]] = []
     sim_func_signature = signature(similarity_measure)
     if str(sim_func_signature).endswith('float'):
         for query in alternative_queries:
@@ -126,7 +126,7 @@ def simple_ranker(input_request: str, alternative_queries: list[str],
             similarities.append((alternative_queries[i], sims[i]))
     # Get the top alternatives by sorting after the similarity (descending)
     top_alternatives: list[str] = []
-    sorted_similarities: list[(str, float)] = sorted(similarities, key=lambda x: x[1], reverse=True)
+    sorted_similarities: list[tuple[str, float]] = sorted(similarities, key=lambda x: x[1], reverse=True)
     for i in range(0, output_length):
         top_alternatives.append(sorted_similarities[i][0])
     return top_alternatives
@@ -225,7 +225,7 @@ def rank_via_clustering_kmeans(input_request: str, alternative_queries: list[str
     :rtype: list[str]
     """
     # Calculate the embeddings
-    query_tensors: list[np.array] = []
+    query_tensors: list = []
     for query in alternative_queries:
         query_tensors.append(model_embedding(query))
     # Cluster using k-means with number of clusters = length of output

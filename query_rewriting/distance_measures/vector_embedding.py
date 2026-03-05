@@ -249,3 +249,4 @@ def calculate_tensor_sim_via_sentence_transformers(input1: Tensor, input2: Tenso
         return util.euclidean_sim(input1, input2).numpy().item()
     elif sim_func == "man":
         return util.manhattan_sim(input1, input2).numpy().item()
+    return util.cos_sim(input1, input2).numpy().item()
