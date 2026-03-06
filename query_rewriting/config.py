@@ -13,7 +13,7 @@ file_input_string: str = os.path.join('resources','spider_with_prefixes_input.tx
 # The default absolute path to the DuckDB database file
 db_file: str = os.path.join('resources','spider_with_prefixes.db')
 # Indicator if the Database has prefixes for tables from different schemas using underlines
-db_prefixes: bool = False # Should be left as is
+db_prefixes: bool = True # Should be left as is
 # The used GPT model in every API call (options: gpt-4o, gpt-4o-mini, o1-preview, o1-mini)
 gpt_model: str = "gpt-4o-mini"
 # A test DB file for testing
