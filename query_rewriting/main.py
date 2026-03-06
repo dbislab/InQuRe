@@ -294,7 +294,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 # Correct the top-k rewrites and annotate uncorrected ones
                 start_time = time.time()
                 corrected_queries, error_messages, query_results, num_corrections_one_query = (
-                    query_correction_and_execution(ranked_alternative_queries, proposed_tables))
+                    query_correction_and_execution(ranked_alternative_queries, proposed_tables)) #TODO add num_iterations here for configuration
                 end_time = time.time()
                 time_list_sql_correction.append(end_time - start_time)
                 num_output_rewrites += number_of_results

@@ -36,7 +36,7 @@ def simple_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
     """
     # return object
     found_tables: dict = dict()
-    tables_sliced_for_prompts: list[list[str]] = get_tables_in_slices_for_llm_call(db_tables, 0.1)
+    tables_sliced_for_prompts: list[list[str]] = get_tables_in_slices_for_llm_call(db_tables, 0.1) #TODO make configurable
     # Count tokens
     local_prompt_tokens: int = 0
     local_completion_tokens: int = 0
@@ -311,7 +311,7 @@ def find_similar_tables(suggested_table_list: list[str], db_tables: dict) -> dic
                     found_tables[db_table] = db_tables.get(db_table, [])
             else:
                 # Improved via tokenization, by adding tables with whitespaces and then using embedding
-                if suggested_tables_nlp[i].similarity(db_tables_nlp[j]) > 0.7:
+                if suggested_tables_nlp[i].similarity(db_tables_nlp[j]) > 0.7: #TODO make configurable
                     found_tables[db_table] = db_tables.get(db_table, [])
                 elif suggested_tables_tokenized_nlp[i].similarity(db_tables_nlp[j]) > 0.7:
                     found_tables[db_table] = db_tables.get(db_table, [])

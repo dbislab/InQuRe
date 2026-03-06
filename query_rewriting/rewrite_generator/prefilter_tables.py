@@ -51,7 +51,7 @@ def simple_prefilter_via_scipy_embedding(input_query: str, db_tables: dict) -> d
     sql_tables: list[str] = extract_tables(input_query)
     for sql_table in sql_tables:
         for db_table, db_columns in db_tables.items():
-            if similarity_spacy_en_core_web_lg(sql_table, db_table, config.nlp_language_model) > 0.4:
+            if similarity_spacy_en_core_web_lg(sql_table, db_table, config.nlp_language_model) > 0.4: #TODO make configurable
                 proposed_tables[db_table] = db_columns
                 # print(f"Table {db_table} has been added for SQL query table {sql_table}.")
     print(f"The following {len(proposed_tables)} tables were found in the database: ")

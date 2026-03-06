@@ -146,7 +146,7 @@ def llm_intent_similarity_measure(input_query: str, alternative_queries: list[st
     # Assumption: All queries fit into one prompt -> no
     alt_queries_formatted: list[str] = [q.strip() if q.strip().endswith(";")
                                         else q.strip() + ";" for q in alternative_queries]
-    amount_of_queries_per_run: int = 10
+    amount_of_queries_per_run: int = 10 # TODO parametrize
     queries_split_for_request: list[list[str]] = \
         [list(islice(alt_queries_formatted, i, i + amount_of_queries_per_run)) for i in
          range(0, len(alt_queries_formatted), amount_of_queries_per_run)]

@@ -6,6 +6,12 @@ import os.path
 import spacy
 from spacy import Language
 
+from query_rewriting.demo_interface.demo_callable import DemoCallable
+from query_rewriting.demo_interface.phase1_statistics import Phase1Statistics
+from query_rewriting.demo_interface.phase2_statistics import Phase2Statistics
+from query_rewriting.demo_interface.phase3_statistics import Phase3Statistics
+from query_rewriting.demo_interface.phase4_statistics import Phase4Statistics
+
 # The following variables are accessed by different packages
 # and can be set here or via the command line
 # The default absolute path to the input file with the SQL queries
@@ -36,6 +42,20 @@ prefilter_kind: int = 1
 rewrite_kind: int = 1
 # The algorithm used for ranking (1 for simple string distance and MMR)
 ranker_kind: int = 1
+# Callback object and statistics to show progress in the demo UI
+demo_callback: DemoCallable|None = None
+statistics1: Phase1Statistics = Phase1Statistics()
+statistics2: Phase2Statistics = Phase2Statistics()
+statistics3: Phase3Statistics = Phase3Statistics()
+statistics4: Phase4Statistics = Phase4Statistics()
+
+# Additional params # TODO use
+embedding_threshold: float = 0.4
+sllm_percent_returned_tables: float = 0.1
+cllm_threshold: float = 0.7
+mmr_lambda: float = 0.7
+llms_package_size: int = 10
+num_correction_tries: int = 3
 
 # The following variables are here to be consistently used in the whole project
 # The output length available for gpt-4o and gpt-4o-mini (in tokens)
