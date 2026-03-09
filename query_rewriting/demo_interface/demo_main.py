@@ -40,6 +40,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
     # TODO implement no filter, simple rewrite, no ranker and give numbers to each one
+    # TODO maybe callable method if an error occurs
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model

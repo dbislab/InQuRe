@@ -42,12 +42,6 @@ prefilter_kind: int = 1
 rewrite_kind: int = 1
 # The algorithm used for ranking (1 for simple string distance and MMR)
 ranker_kind: int = 1
-# Callback object and statistics to show progress in the demo UI
-demo_callback: DemoCallable|None = None
-statistics1: Phase1Statistics = Phase1Statistics()
-statistics2: Phase2Statistics = Phase2Statistics()
-statistics3: Phase3Statistics = Phase3Statistics()
-statistics4: Phase4Statistics = Phase4Statistics()
 
 # Additional params # TODO use
 embedding_threshold: float = 0.4
@@ -56,6 +50,18 @@ cllm_threshold: float = 0.7
 mmr_lambda: float = 0.7
 llms_package_size: int = 10
 num_correction_tries: int = 3
+
+# Callback object and statistics to show progress in the demo UI and save params here
+# UI: Callback Object
+demo_callback: DemoCallable|None = None
+# UI: Phase1 Statistics
+statistics1: Phase1Statistics = Phase1Statistics()
+# UI: Phase2 Statistics
+statistics2: Phase2Statistics = Phase2Statistics()
+# UI: Phase3 Statistics
+statistics3: Phase3Statistics = Phase3Statistics()
+# UI: Phase4 Statistics
+statistics4: Phase4Statistics = Phase4Statistics()
 
 # The following variables are here to be consistently used in the whole project
 # The output length available for gpt-4o and gpt-4o-mini (in tokens)
