@@ -1,7 +1,7 @@
-# TODO documentation, use
 """
 Returns statistics from the rewriter after the rewriting is done.
 """
+# TODO use and note down with comment where each param is set to not lose oversight
 
 class Phase2Statistics:
 
