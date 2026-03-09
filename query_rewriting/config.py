@@ -44,11 +44,17 @@ rewrite_kind: int = 1
 ranker_kind: int = 1
 
 # Additional params # TODO use
+# Similarity threshold for the embedding similarity filter
 embedding_threshold: float = 0.4
+# Percentage of tables expected to be usable
 sllm_percent_returned_tables: float = 0.1
+# Threshold for a table to be considered similar in the complex LLM filter
 cllm_threshold: float = 0.7
+# Lambda parameter for MMR algorithm
 mmr_lambda: float = 0.7
+# Number of rewrites per LLM call asking for similarity to original query
 llms_package_size: int = 10
+# Maximum number of iterations to try and correct a query
 num_correction_tries: int = 3
 
 # Callback object and statistics to show progress in the demo UI and save params here
