@@ -17,7 +17,30 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
                         database_prefix: bool, embedding_threshold: float, sllm_percent_returned_tables: float,
                         cllm_threshold: float, mmr_lambda: float, llms_package_size: int, num_correction_tries: int,
                         demo_object: DemoCallable):
-    # TODO write which param should have which values for which version of stuff (documentation)
+    """
+    Run the rewriter with the given input from the UI.Return intermediate results via the demo_callable object.
+
+    :param original_query: The query that one wants to be rewritten as a string.
+    :param db_file_path: The path to the database file (either relative or absolute) as a string.
+    :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini.
+    :param num_alternatives_returned: The number of alternative queries to be returned to the user in the end.
+    :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
+    :param prefilter_kind: The kind of table filter used by the system. 1 is for the embedding filter (E), 2 for the simple LLM filter (SLLM), and 3 for the complex LLM filter (CLLM).
+    :param rewrite_kind: The kind of rewriter to use. 1 is for the simple rewriting (S) and 2 for the NL rewriting (NL).
+    :param ranker_kind: The kind of ranker to use in the system. 2 is for the simple ranker (I) and 3 for MMR.
+    :param ranker_kind_string_sim: The kind of string similarity to use. There is only one available string similarity (number 1).
+    :param ranker_kind_intent_sim: The kind of similarity to use to measure the intent similarity between two queries. 1 is the embedding similarity via tables (ES) and 2 is the LLM similarity (LLMS).
+    :param database_prefix: True if the database has prefixes in the table names for tables from different sources, false otherwise. This should be set to True for Spider and False for IMDB.
+    :param embedding_threshold: The threshold for table similarity in the embedding table filter. A table is considered if it has a higher embedding similarity to a query table than this. The value range is 0 to 1 and a sensible value is 0.4.
+    :param sllm_percent_returned_tables: This describes how many percent of the tables of our database we think will be usable for the rewrites. The values range is 0 to 1 and a sensible value is, e.g., 0.1.
+    :param cllm_threshold: The similarity threshold above which a database table is considered relevant. If a table has a higher similarity than this to a suggested table from the LLM it will be used for the rewriting phase. The value range is 0 to 1, a sensible value is 0.7.
+    :param mmr_lambda: The lambda parameter for the MMR algorithm. It determines the importance of the similarity of a rewrite to the original query. The value range is 0 to 1, a sensible value is 0.7.
+    :param llms_package_size: This value determines how many rewrites are given to the LLM in bulk when asking the LLM for similarity values to the original query. The minimum is 1, a sensible value is 10. It is recommended to not make this value higher than 20, since LLMs struggle with giving  back a specified number of similarities.
+    :param num_correction_tries: The maximal amount of iterations for correcting a query via the LLM. The minimum is 0 (no correction), a sensible value is 3. For more than that it can happen that the query deviates too much from the original rewrite.
+    :param demo_object: The callable object whose functions are used to return values to the UI.
+    """
+    # TODO implement no filter, simple rewrite, no ranker and give numbers to each one
+    # TODO write small docu for statistics and callable?
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model
