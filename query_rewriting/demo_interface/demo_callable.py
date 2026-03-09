@@ -1,3 +1,7 @@
+"""
+Defines the object that is called to return values to the UI during rewriting.
+"""
+
 from abc import ABC, abstractmethod
 
 from query_rewriting.demo_interface.phase1_statistics import Phase1Statistics
