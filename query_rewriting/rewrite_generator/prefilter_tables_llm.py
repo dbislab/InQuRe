@@ -38,6 +38,8 @@ def simple_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
     found_tables: dict = dict()
     tables_sliced_for_prompts: list[list[str]] = (
         get_tables_in_slices_for_llm_call(db_tables, config.sllm_percent_returned_tables)) # Param from Config
+    # UI: Phase1 Statistics
+    config.statistics1.sllm_num_requests_llm = len(tables_sliced_for_prompts)
     # Count tokens
     local_prompt_tokens: int = 0
     local_completion_tokens: int = 0
@@ -88,6 +90,10 @@ def simple_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
         # print(f"GPT message content:\n{content_for_gpt}")
         completion, llm_used = gpt_api_call(config.gpt_model, message)
         possible_tables: str = completion["choices"][0]["message"]["content"]
+        # UI: Phase1 Statistics
+        config.statistics1.llm_prompts.append(content_for_gpt)
+        config.statistics1.llm_answers.append(possible_tables)
+        # Check LLM answer
         if re.search('No tables usable', strip_whitespaces(possible_tables), flags=re.IGNORECASE) is not None:
             # No tables of this batch are usable
             print(f"No tables were deemed usable in this table batch by the LLM.")
@@ -150,6 +156,9 @@ def simple_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
             f"Tokens used after the table filtering: \n\tPrompt Tokens: {prompt_tokens_prefilter}, "
             f"Completion Tokens: {completion_tokens_prefilter}, Total Tokens: {total_tokens_prefilter}\n")
         add_tokens(local_prompt_tokens, local_completion_tokens, local_total_tokens)
+        # UI: Phase1 Statistics
+        config.statistics1.input_tokens = prompt_tokens_prefilter
+        config.statistics1.output_tokens = completion_tokens_prefilter
     else:
         print("No tokens used for table filtering due to reproducibility DB.")
     return found_tables
@@ -233,6 +242,10 @@ def complex_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
     # print(content_for_gpt)
     completion, llm_used = gpt_api_call(config.gpt_model, message)
     suggested_tables: str = completion["choices"][0]["message"]["content"]
+    # UI: Phase1 Statistics
+    config.statistics1.llm_prompts.append(content_for_gpt)
+    config.statistics1.llm_answers.append(suggested_tables)
+    # Check LLM answer
     matching_tables: dict = dict()
     if re.search('No tables usable', strip_whitespaces(suggested_tables), flags=re.IGNORECASE) is not None:
         # No tables of this batch are usable
@@ -269,6 +282,9 @@ def complex_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
             f"Completion Tokens: {completion_tokens_prefilter}, Total Tokens: {total_tokens_prefilter}\n")
         add_tokens(completion["usage"]["prompt_tokens"], completion["usage"]["completion_tokens"],
                    completion["usage"]["total_tokens"])
+        # UI: Phase1 Statistics
+        config.statistics1.input_tokens = prompt_tokens_prefilter
+        config.statistics1.output_tokens = completion_tokens_prefilter
     else:
         print("No tokens used for table filtering due to reproducibility DB.")
     return matching_tables

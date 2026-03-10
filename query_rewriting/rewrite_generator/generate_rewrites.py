@@ -40,6 +40,11 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
     start_time_filter: float = time.time()
     proposed_tables: dict = prefilter_tables(query, prefilter_kind)
     end_time_filter: float = time.time()
+    # UI: Phase1 Statistics
+    config.statistics1.runtime = end_time_filter - start_time_filter
+    config.statistics1.num_selected_tables = len(proposed_tables.keys())
+    config.statistics1.selected_tables = proposed_tables
+    # Check if tables found
     if len(proposed_tables) == 0:
         # No available tables for a rewrite
         add_rewriting_timings(end_time_filter - start_time_filter, 0)

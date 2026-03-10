@@ -5,6 +5,10 @@ import os
 
 import query_rewriting.config as config
 from query_rewriting.demo_interface.demo_callable import DemoCallable
+from query_rewriting.demo_interface.phase1_statistics import Phase1Statistics
+from query_rewriting.demo_interface.phase2_statistics import Phase2Statistics
+from query_rewriting.demo_interface.phase3_statistics import Phase3Statistics
+from query_rewriting.demo_interface.phase4_statistics import Phase4Statistics
 from query_rewriting.distance_measures.vector_embedding import set_up_model
 from query_rewriting.main import execute_query_rewriting
 from query_rewriting.utilities.duckdb_functions import check_existence_of_tables
@@ -42,6 +46,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     # TODO implement no filter, no ranker for -1; no ranker also no pruner?
     # TODO callable method if an error occurs: method 4 not needed?
     # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
+    # TODO check if tokens, statistics etc reset after each run
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model
@@ -57,13 +62,18 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     # Params set to defaults
     config.reproducibility = False
     config.check_executability = False
-    # additional params
+    # Additional params
     config.embedding_threshold = embedding_threshold
     config.sllm_percent_returned_tables = sllm_percent_returned_tables
     config.cllm_threshold = cllm_threshold
     config.mmr_lambda = mmr_lambda
     config.llms_package_size = llms_package_size
     config.num_correction_tries = num_correction_tries
+    # Reset statistics
+    config.statistics1 = Phase1Statistics()
+    config.statistics2 = Phase2Statistics()
+    config.statistics3 = Phase3Statistics()
+    config.statistics4 = Phase4Statistics()
     # Check if we have a query
     # TODO catch following errors in UI to show error message on screen?
     if original_query.strip == "" or original_query is None:
