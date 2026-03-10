@@ -36,7 +36,8 @@ def simple_prefilter_via_llm(input_query: str, db_tables: dict) -> dict:
     """
     # return object
     found_tables: dict = dict()
-    tables_sliced_for_prompts: list[list[str]] = get_tables_in_slices_for_llm_call(db_tables, 0.1) #TODO make configurable
+    tables_sliced_for_prompts: list[list[str]] = (
+        get_tables_in_slices_for_llm_call(db_tables, config.sllm_percent_returned_tables)) # Param from Config
     # Count tokens
     local_prompt_tokens: int = 0
     local_completion_tokens: int = 0
@@ -311,13 +312,13 @@ def find_similar_tables(suggested_table_list: list[str], db_tables: dict) -> dic
                     found_tables[db_table] = db_tables.get(db_table, [])
             else:
                 # Improved via tokenization, by adding tables with whitespaces and then using embedding
-                if suggested_tables_nlp[i].similarity(db_tables_nlp[j]) > 0.7: #TODO make configurable
+                if suggested_tables_nlp[i].similarity(db_tables_nlp[j]) > config.cllm_threshold: # Param from Config
                     found_tables[db_table] = db_tables.get(db_table, [])
-                elif suggested_tables_tokenized_nlp[i].similarity(db_tables_nlp[j]) > 0.7:
+                elif suggested_tables_tokenized_nlp[i].similarity(db_tables_nlp[j]) > config.cllm_threshold: # Param from Config
                     found_tables[db_table] = db_tables.get(db_table, [])
-                elif suggested_tables_nlp[i].similarity(db_tables_tokenized_nlp[j]) > 0.7:
+                elif suggested_tables_nlp[i].similarity(db_tables_tokenized_nlp[j]) > config.cllm_threshold: # Param from Config
                     found_tables[db_table] = db_tables.get(db_table, [])
-                elif suggested_tables_tokenized_nlp[i].similarity(db_tables_tokenized_nlp[j]) > 0.7:
+                elif suggested_tables_tokenized_nlp[i].similarity(db_tables_tokenized_nlp[j]) > config.cllm_threshold: # Param from Config
                     found_tables[db_table] = db_tables.get(db_table, [])
     return found_tables
 

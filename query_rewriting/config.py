@@ -46,19 +46,19 @@ ranker_kind: int = 1
 # True if it should be checked, False otherwise
 check_executability: bool = False
 
-# Additional params # TODO use
+# Additional params, only changeable here or via UI method
 # Similarity threshold for the embedding similarity filter
-embedding_threshold: float = 0.4
+embedding_threshold: float = 0.4  # Used in prefilter_tables
 # Percentage of tables expected to be usable
-sllm_percent_returned_tables: float = 0.1
+sllm_percent_returned_tables: float = 0.1 # Used in prefilter_tables_llm
 # Threshold for a table to be considered similar in the complex LLM filter
-cllm_threshold: float = 0.7
-# Lambda parameter for MMR algorithm
-mmr_lambda: float = 0.7
+cllm_threshold: float = 0.7 # Used in prefilter_tables_llm
+# Lambda parameter for MMR algorithm (ranker 3)
+mmr_lambda: float = 0.7 # Used in rank_alternatives
 # Number of rewrites per LLM call asking for similarity to original query
-llms_package_size: int = 10
+llms_package_size: int = 10 # Used in sql_queries_comparison
 # Maximum number of iterations to try and correct a query
-num_correction_tries: int = 3
+num_correction_tries: int = 3 # Used in main as param for function from query_correction
 
 # Callback object and statistics to show progress in the demo UI and save params here
 # UI: Callback Object

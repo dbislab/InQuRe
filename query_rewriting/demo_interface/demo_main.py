@@ -41,6 +41,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     """
     # TODO implement no filter, no ranker for -1; no ranker also no pruner?
     # TODO callable method if an error occurs: method 4 not needed?
+    # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model

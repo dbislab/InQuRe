@@ -57,7 +57,7 @@ def rank_alternative_queries(input_request: str, alternative_queries: list[str],
         ranked_queries = simple_ranker(input_request, alternative_queries_pruned, intent_sim_func, output_length)
     elif ranker_kind == 3:
         ranked_queries = maximal_marginal_relevance(input_request, alternative_queries_pruned, string_sim_func,
-                                                    intent_sim_func, 0.7, output_length) # TODO make lambda configurable
+                                                    intent_sim_func, config.mmr_lambda, output_length) # Lambda as param from Config
     elif ranker_kind == 4:
         ranked_queries = rank_via_clustering_dbscan(input_request, alternative_queries_pruned, string_sim_func,
                                                     intent_sim_func, output_length)
