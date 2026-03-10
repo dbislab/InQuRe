@@ -97,7 +97,7 @@ class TestUtilitiesDuckDB(unittest.TestCase):
         create_in_db2: str = "CREATE TABLE tbl2(k INTEGER, l VARCHAR, m DATE);"
         con.execute(create1)
         con.execute(create2)
-        create_statements_list: list = con.execute("SELECT table_name, sql FROM duckdb_tables()").fetchall()
+        create_statements_list: list = con.execute("SELECT table_name, sql FROM duckdb_tables() WHERE internal=false").fetchall()
         create_statements_dict: dict = dict(create_statements_list)
         con.close()
         self.assertEqual(create_statements_dict.pop("tbl"), create_in_db1)

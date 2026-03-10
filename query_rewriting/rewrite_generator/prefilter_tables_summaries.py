@@ -117,7 +117,7 @@ def create_summaries(tables_needing_summary: list[str], max_tables_per_prompt: i
     # Get the CREATE TABLE statements for all the tables from the database
     #  (database is not empty, checked at start of main method)
     con = duckdb.connect(config.db_file)
-    create_statements_list: list = con.execute("SELECT table_name, sql FROM duckdb_tables()").fetchall()
+    create_statements_list: list = con.execute("SELECT table_name, sql FROM duckdb_tables() WHERE internal=false").fetchall()
     con.close()
     create_statements_dict: dict = dict(create_statements_list)
     # Slice the list into parts of the right size for the LLM

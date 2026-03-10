@@ -88,7 +88,7 @@ def check_proposed_tables_exact(schema: dict, test: bool) -> Tuple[bool, dict]:
     else:
         path = config.db_file
     con = duckdb.connect(path)
-    res: list = con.execute("SELECT table_name FROM duckdb_tables()").fetchall()
+    res: list = con.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
     existent_tables: dict = dict()
     existent_tables_count: int = 0
     # Fetch all table names into a single tuple

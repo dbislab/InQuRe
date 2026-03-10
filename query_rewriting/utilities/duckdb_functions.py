@@ -41,7 +41,7 @@ def get_tables_from_db(test: bool) -> dict:
     else:
         path = config.db_file
     con = duckdb.connect(path)
-    db_tables_unprocessed: list = con.execute("SELECT table_name FROM duckdb_tables()").fetchall()
+    db_tables_unprocessed: list = con.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
     # Fetch all table names into a single tuple
     # (throws error if no tables in DB, but this is checked at the execution start)
     db_tables: list = list(list(zip(*db_tables_unprocessed))[0])
@@ -118,7 +118,7 @@ def check_existence_of_tables(test: bool) -> bool:
         path = config.db_file
     # Get the tables
     connection = duckdb.connect(path)
-    db_tables: list = connection.execute("SELECT table_name FROM duckdb_tables()").fetchall()
+    db_tables: list = connection.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
     connection.close()
     if len(db_tables) == 0:
         return False
