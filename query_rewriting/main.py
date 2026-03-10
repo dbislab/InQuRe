@@ -66,6 +66,8 @@ def main():
                         help='Kind of intent similarity function used for the ranker')
     parser.add_argument('-rep', '--reproducibility', default=config.reproducibility, type=bool,
                         help='True if we want to use saved LLM responses from a DB')
+    parser.add_argument('-ce', '--check-executability', default=config.check_executability, type=bool,
+                        help='True if we want to check if the query is executable and skip rewriting if it is')
     # Parse the arguments from the command line
     # (arguments names use first long flag without the initial "--", replacing "-" in the name with "_")
     args: Namespace = parser.parse_args()
@@ -81,6 +83,7 @@ def main():
     config.sim_measure_string = args.ranker_kind_string_sim
     config.sim_measure_intent = args.ranker_kind_intent_sim
     config.reproducibility = args.reproducibility
+    config.check_executability = args.check_executability
     # Check the used parameters:
     print("Executing the query rewriting:  ")
     print(f"The used parameters are:  ")
@@ -106,6 +109,10 @@ def main():
         print(f"Reproducibility: ON (DB used)\n")
     else:
         print(f"Reproducibility: OFF (LLM used)\n")
+    if config.check_executability:
+        print(f"Checking executability: ON (Skip executable original queries)\n")
+    else:
+        print(f"Checking executability: OFF (No original queries skipped)\n")
     # Check if the input files exist
     if not (os.path.isfile(config.file_input_string)):
         print("\nWarning: The specified input file does not exist.")  # would throw error in reading
@@ -233,17 +240,20 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
             # The next request is in natural language
             # NL not implemented yet
             raise NotYetSupportedException(
-                f"Natural Language Input not yet supported, request '{request_tuple[1]}' will be skipped.")
+                f"Natural Language Input not yet supported, request '{request_tuple[1]}' will be skipped.") #TODO support NL????
         elif request_tuple[0] == sql_string:
             # The next request is in SQL
             num_queries_sql += 1
             query: str = request_tuple[1]
-            # Check if the query is executable
-            start_time_sql = time.time()
-            query_execution_possible, possible_result = check_query_execution(query, False)
-            end_time_sql = time.time()
-            time_list_sql_check_execution.append(end_time_sql - start_time_sql)
-            if query_execution_possible:
+            # Check if the query is executable (if wanted)
+            query_execution_possible: bool = False
+            possible_result: list = list()
+            if config.check_executability:
+                start_time_sql = time.time()
+                query_execution_possible, possible_result = check_query_execution(query, False)
+                end_time_sql = time.time()
+                time_list_sql_check_execution.append(end_time_sql - start_time_sql)
+            if query_execution_possible:  #TODO what to do if query is executable in UI?
                 # Execute the query (possibly altered with other tables)
                 print("Query was executed with the following result:")
                 print(*possible_result, sep='\n')
@@ -267,6 +277,13 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     num_no_rewrites_found_queries += 1
                     end_time = time.time()
                     time_list_sql_rewrite.append(end_time - start_time)
+                    if not config.demo_callback is None:
+                        if "No tables in the database" in str(e):
+                            # UI: Callback Object: Phase 1 Error
+                            config.demo_callback.first_phase_error(str(e))
+                        else:
+                            # UI: Callback Object: Phase 2 Error
+                            config.demo_callback.second_phase_error(str(e))
                     continue
                 # Rewrites were found
                 print(f"Alternative queries ({len(alternative_queries)}):")
@@ -293,6 +310,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     num_no_rewrites_found_queries += 1
                     end_time = time.time()
                     time_list_sql_rank.append(end_time - start_time)
+                    if not config.demo_callback is None:
+                        config.demo_callback.third_phase_error(str(e))
                     continue
                 # UI: Callback Object: Phase3 Statistics Function Call
                 if not config.demo_callback is None:
@@ -300,7 +319,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 # Correct the top-k rewrites and annotate uncorrected ones
                 start_time = time.time()
                 corrected_queries, error_messages, query_results, num_corrections_one_query = (
-                    query_correction_and_execution(ranked_alternative_queries, proposed_tables)) #TODO add num_iterations here for configuration
+                    query_correction_and_execution(ranked_alternative_queries, proposed_tables))  #TODO add num_iterations here for configuration
                 end_time = time.time()
                 time_list_sql_correction.append(end_time - start_time)
                 num_output_rewrites += number_of_results

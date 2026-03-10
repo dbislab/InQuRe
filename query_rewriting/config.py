@@ -42,6 +42,9 @@ prefilter_kind: int = 1
 rewrite_kind: int = 1
 # The algorithm used for ranking (1 for simple string distance and MMR)
 ranker_kind: int = 1
+# The flag to decide if executability of the input query is checked (if the query is executable, no rewriting will be done)
+# True if it should be checked, False otherwise
+check_executability: bool = False
 
 # Additional params # TODO use
 # Similarity threshold for the embedding similarity filter

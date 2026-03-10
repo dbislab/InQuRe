@@ -63,7 +63,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     config.num_correction_tries = num_correction_tries
     # Check if we have a query
     if original_query.strip == "" or original_query is None:
-        raise config.RewritingNotPossible("Input Query is empty")
+        raise config.RewritingNotPossible("Input Query is empty") # TODO is this checked via interface?
     # Check if the database exists
     if not (os.path.isfile(config.db_file)):
         # Results in maybe an empty DB:
