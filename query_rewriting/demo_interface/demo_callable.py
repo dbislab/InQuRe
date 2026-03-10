@@ -9,7 +9,7 @@ from query_rewriting.demo_interface.phase2_statistics import Phase2Statistics
 from query_rewriting.demo_interface.phase3_statistics import Phase3Statistics
 from query_rewriting.demo_interface.phase4_statistics import Phase4Statistics
 
-# TODO use error functions and make sure no other functions are called afterward
+
 class DemoCallable(ABC):
 
     @abstractmethod

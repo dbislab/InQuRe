@@ -65,8 +65,9 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     config.llms_package_size = llms_package_size
     config.num_correction_tries = num_correction_tries
     # Check if we have a query
+    # TODO catch following errors in UI to show error message on screen?
     if original_query.strip == "" or original_query is None:
-        raise config.RewritingNotPossible("Input Query is empty") # TODO is this checked via interface?
+        raise config.RewritingNotPossible("Input Query is empty")
     # Check if the database exists
     if not (os.path.isfile(config.db_file)):
         # Results in maybe an empty DB:
@@ -85,6 +86,6 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     # Set up the reproducibility DB
     if config.reproducibility:
         create_reproducibility_database(False)
-    # Execute the workflow
+    # Execute the workflow (after each phase it calls demo object function with right statistics)
     execute_query_rewriting([['SQL',original_query]], config.num_alternatives, config.rewrite_kind,
-                            config.ranker_kind, config.num_results, config.prefilter_kind)  # TODO after each phase call demo object function with right statistics
+                            config.ranker_kind, config.num_results, config.prefilter_kind)
