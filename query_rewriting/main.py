@@ -253,7 +253,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 query_execution_possible, possible_result = check_query_execution(query, False)
                 end_time_sql = time.time()
                 time_list_sql_check_execution.append(end_time_sql - start_time_sql)
-            if query_execution_possible:  #TODO what to do if query is executable in UI?
+            # Only skip query if execution possible (checked only if configured like this)
+            if query_execution_possible:
                 # Execute the query (possibly altered with other tables)
                 print("Query was executed with the following result:")
                 print(*possible_result, sep='\n')

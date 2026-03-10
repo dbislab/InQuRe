@@ -25,9 +25,9 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini.
     :param num_alternatives_returned: The number of alternative queries to be returned to the user in the end.
     :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
-    :param prefilter_kind: The kind of table filter used by the system. 1 is for the embedding filter (E), 2 for the simple LLM filter (SLLM), and 3 for the complex LLM filter (CLLM).
+    :param prefilter_kind: The kind of table filter used by the system. 1 is for the embedding filter (E), 2 for the simple LLM filter (SLLM), and 3 for the complex LLM filter (CLLM). Set this to -1 for no filter.
     :param rewrite_kind: The kind of rewriter to use. 1 is for the simple rewriting (S) and 2 for the NL rewriting (NL).
-    :param ranker_kind: The kind of ranker to use in the system. 2 is for the simple ranker (I) and 3 for MMR.
+    :param ranker_kind: The kind of ranker to use in the system. 2 is for the simple ranker (I) and 3 for MMR. Set this to -1 for no ranking.
     :param ranker_kind_string_sim: The kind of string similarity to use. There is only one available string similarity (number 1).
     :param ranker_kind_intent_sim: The kind of similarity to use to measure the intent similarity between two queries. 1 is the embedding similarity via tables (ES) and 2 is the LLM similarity (LLMS).
     :param database_prefix: True if the database has prefixes in the table names for tables from different sources, false otherwise. This should be set to True for Spider and False for IMDB.
@@ -39,8 +39,8 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     :param num_correction_tries: The maximal amount of iterations for correcting a query via the LLM. The minimum is 0 (no correction), a sensible value is 3. For more than that it can happen that the query deviates too much from the original rewrite.
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
-    # TODO implement no filter, simple rewrite, no ranker and give numbers to each one
-    # TODO maybe callable method if an error occurs
+    # TODO implement no filter, no ranker for -1; no ranker also no pruner?
+    # TODO callable method if an error occurs: method 4 not needed?
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model
@@ -53,7 +53,9 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     config.sim_measure_string = ranker_kind_string_sim
     config.sim_measure_intent = ranker_kind_intent_sim
     config.demo_callback = demo_object
-    # Reproducibility always set to false currently
+    # Params set to defaults
+    config.reproducibility = False
+    config.check_executability = False
     # additional params
     config.embedding_threshold = embedding_threshold
     config.sllm_percent_returned_tables = sllm_percent_returned_tables
