@@ -273,7 +273,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 print(*alternative_queries, sep="\n")
                 print("")
                 # UI: Callback Object: Phase2 Statistics Function Call
-                config.demo_callback.second_phase_done(config.statistics2)
+                if not config.demo_callback is None:
+                    config.demo_callback.second_phase_done(config.statistics2)
                 # Rank the rewrites
                 start_time = time.time()
                 try:
@@ -294,7 +295,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     time_list_sql_rank.append(end_time - start_time)
                     continue
                 # UI: Callback Object: Phase3 Statistics Function Call
-                config.demo_callback.third_phase_done(config.statistics3)
+                if not config.demo_callback is None:
+                    config.demo_callback.third_phase_done(config.statistics3)
                 # Correct the top-k rewrites and annotate uncorrected ones
                 start_time = time.time()
                 corrected_queries, error_messages, query_results, num_corrections_one_query = (
@@ -323,7 +325,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                         break
                 list_num_non_correctable_queries.append(num_non_correctable_queries)
                 # UI: Callback Object: Phase4 Statistics Function Call
-                config.demo_callback.fourth_phase_done(config.statistics4)
+                if not config.demo_callback is None:
+                    config.demo_callback.fourth_phase_done(config.statistics4)
         else:
             # Input type of the request is not supported by the system (neither SQL nor NL)
             raise Exception(f"Unsupported Input Type: {request_tuple[0]} for request '{request_tuple[1]}'")

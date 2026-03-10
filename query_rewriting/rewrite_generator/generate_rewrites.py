@@ -45,7 +45,8 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
         add_rewriting_timings(end_time_filter - start_time_filter, 0)
         raise NoRewritesFoundException("No tables in the database can be used to rewrite the query.")
     # UI: Callback Object: Phase1 Statistics Function Call
-    config.demo_callback.first_phase_done(config.statistics1)
+    if not config.demo_callback is None:
+        config.demo_callback.first_phase_done(config.statistics1)
     start_time_rewrite: float = time.time()
     if rewrite_kind == 1:
         # Simple zero-shot prompting should be used
