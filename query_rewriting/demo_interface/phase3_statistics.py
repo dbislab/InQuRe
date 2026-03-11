@@ -1,7 +1,6 @@
 """
 Returns statistics from the rewriter after the ranking is done.
 """
-# TODO use and note down with comment where each param is set to not lose oversight
 
 class Phase3Statistics:
     # LLM is only used by the LLM-based similarity measure in this phase
