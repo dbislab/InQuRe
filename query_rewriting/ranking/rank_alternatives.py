@@ -27,6 +27,8 @@ def rank_alternative_queries(input_request: str, alternative_queries: list[str],
     :rtype: list[str]
     """
     alternative_queries_pruned: list[str] = prune_alternatives(input_request, alternative_queries)
+    # UI: Phase3 Statistics
+    config.statistics3.num_pruned_queries = len(alternative_queries) - len(alternative_queries_pruned)
     # Check if there are enough queries to start the ranking process
     if len(alternative_queries_pruned) < output_length:
         raise RankingNotPossible("Too many queries were pruned to have enough queries for the output.")

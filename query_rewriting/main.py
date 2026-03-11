@@ -315,6 +315,9 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     if not config.demo_callback is None:
                         config.demo_callback.third_phase_error(str(e))
                     continue
+                # UI: Phase3 Statistics
+                config.statistics3.runtime = end_time - start_time
+                config.statistics3.ranked_queries = ranked_alternative_queries
                 # UI: Callback Object: Phase3 Statistics Function Call
                 if not config.demo_callback is None:
                     config.demo_callback.third_phase_done(config.statistics3)

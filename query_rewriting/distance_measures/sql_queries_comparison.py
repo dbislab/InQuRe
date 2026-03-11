@@ -151,6 +151,9 @@ def llm_intent_similarity_measure(input_query: str, alternative_queries: list[st
         [list(islice(alt_queries_formatted, i, i + amount_of_queries_per_run)) for i in
          range(0, len(alt_queries_formatted), amount_of_queries_per_run)]
     all_results_together: list[float] = []
+    # UI: Phase3 Statistics
+    config.statistics3.llms_num_requests_to_LLM = len(queries_split_for_request)
+    # Send LLM requests
     for alt_queries in queries_split_for_request:
         alt_queries_prompt_str: str = "\n".join(alt_queries)
         content_for_gpt: str = (f"I will give you a single SQL query called original query.\n"
@@ -189,6 +192,12 @@ def llm_intent_similarity_measure(input_query: str, alternative_queries: list[st
         similarity_values_str = strip_starting_and_ending_characters(strip_code_block_output(similarity_values_str))
         similarity_values: list[float] = [float(num.strip()) for num in
                                           similarity_values_str.split(";") if num.strip() != '']
+        # UI: Phase3 Statistics
+        config.statistics3.llm_prompts.append(content_for_gpt)
+        config.statistics3.llm_answers.append(similarity_values_str)
+        config.statistics3.input_tokens += completion["usage"]["prompt_tokens"]
+        config.statistics3.output_tokens += completion["usage"]["completion_tokens"]
+        # Check tokens used
         if llm_used:
             prompt_tokens_query_comparison_t += completion["usage"]["prompt_tokens"]
             completion_tokens_query_comparison_t += completion["usage"]["completion_tokens"]
