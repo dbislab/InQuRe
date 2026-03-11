@@ -210,8 +210,8 @@ def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, propose
         add_tokens(completion["usage"]["prompt_tokens"], completion["usage"]["completion_tokens"],
                    completion["usage"]["total_tokens"])
         # UI: Phase2 Statistics
-        config.statistics2.input_tokens = prompt_tokens_query_rewriting
-        config.statistics2.output_tokens = completion_tokens_query_rewriting
+        config.statistics2.input_tokens += prompt_tokens_query_rewriting
+        config.statistics2.output_tokens += completion_tokens_query_rewriting
     else:
         print("No tokens used for query rewriting due to reproducibility DB.")
     return alt_queries_formatted

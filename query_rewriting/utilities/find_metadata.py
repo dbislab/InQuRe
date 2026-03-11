@@ -91,8 +91,8 @@ def llm_find_intent_sql(input_request: str) -> str:
     # UI: Phase2 Statistics
     config.statistics2.llm_prompts.append(content_for_gpt)
     config.statistics2.llm_answers.append(intent_gpt)
-    config.statistics2.input_tokens = completion["usage"]["prompt_tokens"]
-    config.statistics2.output_tokens = completion["usage"]["completion_tokens"]
+    config.statistics2.input_tokens += completion["usage"]["prompt_tokens"]
+    config.statistics2.output_tokens += completion["usage"]["completion_tokens"]
     # Get the intent
     intent: str = strip_whitespaces(strip_preceding_keywords(intent_gpt, "Intent:"))
     return intent
