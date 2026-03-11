@@ -311,6 +311,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     num_no_rewrites_found_queries += 1
                     end_time = time.time()
                     time_list_sql_rank.append(end_time - start_time)
+                    # UI: Callback Object: Phase 3 Error
                     if not config.demo_callback is None:
                         config.demo_callback.third_phase_error(str(e))
                     continue
