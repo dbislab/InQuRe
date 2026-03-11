@@ -167,14 +167,17 @@ def run_rewriter_for_ui_test(original_query: str, db_file_path: str, gpt_model: 
     # Test calls for the callback object
     if random.uniform(0,1) < 0.1:
         config.demo_callback.first_phase_error("No tables found")
+        return
     config.demo_callback.first_phase_done(config.statistics1)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
         config.demo_callback.second_phase_error("No rewrites found")
+        return
     config.demo_callback.second_phase_done(config.statistics2)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
         config.demo_callback.third_phase_error("TOo many queries pruned")
+        return 
     config.demo_callback.third_phase_done(config.statistics3)
     time.sleep(2)
     config.demo_callback.fourth_phase_done(config.statistics4)
