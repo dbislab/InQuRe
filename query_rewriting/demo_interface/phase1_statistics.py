@@ -3,6 +3,7 @@ Returns statistics from the rewriter after the table filtering is done.
 """
 
 class Phase1Statistics:
+    # Only set correctly for embedding filter, simple LLM filter, and complex LLM filter
 
     # Runtime in seconds
     runtime: float = 0 # Set in generate_rewrites

@@ -66,6 +66,10 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
             f"Configured rewrite mode not implemented (method: {rewrite_kind}). Skipping query '{query}'.")
     end_time_rewrite: float = time.time()
     add_rewriting_timings(end_time_filter - start_time_filter, end_time_rewrite - start_time_rewrite)
+    # UI: Phase2 Statistics
+    config.statistics2.runtime = end_time_rewrite - start_time_rewrite
+    config.statistics2.current_rewrites = result
+    config.statistics2.num_produced_rewrites = len(result)
     if len(result) == 0:
         # No rewrites were found
         raise NoRewritesFoundException(
@@ -117,6 +121,9 @@ def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_table
     completion, llm_used = gpt_api_call(config.gpt_model, message)
     # Split the alternative queries via the token given to GPT
     sql_queries_gpt: str = completion["choices"][0]["message"]["content"]
+    # UI: Phase2 Statistics
+    config.statistics2.llm_prompts.append(content_for_gpt)
+    config.statistics2.llm_answers.append(sql_queries_gpt)
     # print(f"Answer from GPT:\n{sql_queries_gpt}")
     alt_queries: list[str] = sql_queries_gpt.split(";")  #("!NEXT QUERY!")
     # Extract only the SQL string from the response (for each query in the result list), remove empty queries
@@ -134,6 +141,9 @@ def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_table
             f"Completion Tokens: {completion_tokens_query_rewriting}, Total Tokens: {total_tokens_query_rewriting}\n")
         add_tokens(completion["usage"]["prompt_tokens"], completion["usage"]["completion_tokens"],
                    completion["usage"]["total_tokens"])
+        # UI: Phase2 Statistics
+        config.statistics2.input_tokens = prompt_tokens_query_rewriting
+        config.statistics2.output_tokens = completion_tokens_query_rewriting
     else:
         print("No tokens used for query rewriting due to reproducibility DB.")
     return alt_queries_formatted
@@ -180,6 +190,10 @@ def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, propose
     # Get an answer from the LLM and process it (just as in simple_gpt_rewriting)
     completion, llm_used = gpt_api_call(config.gpt_model, message)
     sql_queries_gpt: str = completion["choices"][0]["message"]["content"]
+    # UI: Phase2 Statistics
+    config.statistics2.llm_prompts.append(content_for_gpt)
+    config.statistics2.llm_answers.append(sql_queries_gpt)
+    # Evaluate LLM answer
     alt_queries: list[str] = sql_queries_gpt.split(";")
     alt_queries_formatted = [strip_sql_output(query) for query in alt_queries if strip_sql_output(query) != '']
     # Count how many tokens were used
@@ -195,6 +209,9 @@ def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, propose
             f"Completion Tokens: {completion_tokens_query_rewriting}, Total Tokens: {total_tokens_query_rewriting}\n")
         add_tokens(completion["usage"]["prompt_tokens"], completion["usage"]["completion_tokens"],
                    completion["usage"]["total_tokens"])
+        # UI: Phase2 Statistics
+        config.statistics2.input_tokens = prompt_tokens_query_rewriting
+        config.statistics2.output_tokens = completion_tokens_query_rewriting
     else:
         print("No tokens used for query rewriting due to reproducibility DB.")
     return alt_queries_formatted
