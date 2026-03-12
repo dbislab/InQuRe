@@ -348,6 +348,14 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                         list_num_non_correctable_queries.append(num_non_correctable_queries)
                         break
                 list_num_non_correctable_queries.append(num_non_correctable_queries)
+                # UI: Phase4 Statistics
+                config.statistics4.runtime = end_time - start_time
+                config.statistics4.num_non_correctable_queries = num_non_correctable_queries
+                config.statistics4.num_queries_needing_correction = num_corrections_one_query
+                config.statistics4.final_rewrites = corrected_queries
+                config.statistics4.error_messages = error_messages
+                config.statistics4.results_of_final_rewrites = query_results
+                config.statistics4.num_corrections_rounds_in_total = len(config.statistics4.llm_prompts)
                 # UI: Callback Object: Phase4 Statistics Function Call
                 if not config.demo_callback is None:
                     config.demo_callback.fourth_phase_done(config.statistics4)

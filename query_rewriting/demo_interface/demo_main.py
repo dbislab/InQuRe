@@ -50,6 +50,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
     # TODO check for global variables/other variables that they are reset after each run!
     # TODO implement loading from cache?
+    # TODO prune queries using non-existent table before ranking?
     # Set the config parameters
     config.db_file = db_file_path
     config.gpt_model = gpt_model
@@ -177,7 +178,7 @@ def run_rewriter_for_ui_test(original_query: str, db_file_path: str, gpt_model: 
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
         config.demo_callback.third_phase_error("TOo many queries pruned")
-        return 
+        return
     config.demo_callback.third_phase_done(config.statistics3)
     time.sleep(2)
     config.demo_callback.fourth_phase_done(config.statistics4)

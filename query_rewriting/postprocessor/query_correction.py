@@ -133,6 +133,9 @@ def gentle_self_correction(input_query: str, usable_tables: dict, error_message:
     # Get the response from the LLM
     completion, llm_used = gpt_api_call(config.gpt_model, message)
     stripped_query: str = strip_sql_output(completion["choices"][0]["message"]["content"])
+    # UI: Phase4 Statistics
+    config.statistics4.llm_prompts.append(content_for_gpt)
+    config.statistics4.llm_answers.append(completion["choices"][0]["message"]["content"])
     # Count the tokens
     if llm_used:
         global prompt_tokens_query_correction
@@ -145,6 +148,9 @@ def gentle_self_correction(input_query: str, usable_tables: dict, error_message:
               f"Tokens: {completion_tokens_query_correction}, Total Tokens: {total_tokens_query_correction}")
         add_tokens(completion["usage"]["prompt_tokens"], completion["usage"]["completion_tokens"],
                    completion["usage"]["total_tokens"])
+        # UI: Phase4 Statistics
+        config.statistics4.input_tokens += prompt_tokens_query_correction
+        config.statistics4.output_tokens += completion_tokens_query_correction
     else:
         print("No tokens used for query correction due to reproducibility DB.")
     return stripped_query
