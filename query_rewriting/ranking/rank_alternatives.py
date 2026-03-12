@@ -1,6 +1,8 @@
 """
 Ranking algorithms for the produced alternative queries
 """
+import random
+
 from query_rewriting.config import NotYetSupportedException, RankingNotPossible
 from collections.abc import Callable
 from query_rewriting.distance_measures.sql_queries_comparison import difflib_simple_comparison, \
@@ -68,6 +70,9 @@ def rank_alternative_queries(input_request: str, alternative_queries: list[str],
                                                     output_length)
     elif ranker_kind == 6:
         ranked_queries = rank_via_llm(input_request, alternative_queries_pruned, output_length)
+    elif ranker_kind == -1:
+        # No ranker should be used, random selection and ordering of elements
+        ranked_queries = random.sample(alternative_queries_pruned, output_length)
     else:
         raise NotYetSupportedException(f"Ranking queries using kind {ranker_kind} is not yet supported")
     # Check if there are still enough queries after the ranking

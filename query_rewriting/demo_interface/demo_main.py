@@ -33,7 +33,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
     :param prefilter_kind: The kind of table filter used by the system. 1 is for the embedding filter (E), 2 for the simple LLM filter (SLLM), and 3 for the complex LLM filter (CLLM). Set this to -1 for no filter.
     :param rewrite_kind: The kind of rewriter to use. 1 is for the simple rewriting (S) and 2 for the NL rewriting (NL).
-    :param ranker_kind: The kind of ranker to use in the system. 2 is for the simple ranker (I) and 3 for MMR. Set this to -1 for no ranking.
+    :param ranker_kind: The kind of ranker to use in the system. 2 is for the simple ranker (I) and 3 for MMR. Set this to -1 for no ranking (pruner still active then).
     :param ranker_kind_string_sim: The kind of string similarity to use. There is only one available string similarity (number 1).
     :param ranker_kind_intent_sim: The kind of similarity to use to measure the intent similarity between two queries. 1 is the embedding similarity via tables (ES) and 2 is the LLM similarity (LLMS).
     :param database_prefix: True if the database has prefixes in the table names for tables from different sources, false otherwise. This should be set to True for Spider and False for IMDB.
@@ -45,8 +45,6 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     :param num_correction_tries: The maximal amount of iterations for correcting a query via the LLM. The minimum is 0 (no correction), a sensible value is 3. For more than that it can happen that the query deviates too much from the original rewrite.
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
-    # TODO implement no filter, no ranker for -1; no ranker also no pruner?
-    # TODO callable method if an error occurs: method 4 not needed?
     # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
     # TODO check for global variables/other variables that they are reset after each run!
     # TODO implement loading from cache?

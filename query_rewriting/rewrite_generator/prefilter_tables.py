@@ -31,6 +31,8 @@ def prefilter_tables(input_query: str, prefilter_kind: int) -> dict:
         return complex_prefilter_via_llm(input_query, db_tables)
     elif prefilter_kind == 4:
         return prefilter_tables_via_summaries(input_query, db_tables)
+    elif prefilter_kind == -1: # No filter should be used
+        return db_tables
     else:
         raise NotYetSupportedException(f"Pre-filtering tables using kind {prefilter_kind} is not yet supported")
 

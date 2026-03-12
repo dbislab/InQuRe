@@ -144,7 +144,8 @@ Output:
     - Timings of different workflow parts
     - Tokens for the API calls used in total for this program run
 
-There are more options for some of the parameters not mentioned in the paper. These were tested but deemed less interesting than those shown in the paper.
+There are more options for some of the parameters not mentioned in the paper. These were tested but deemed less interesting than those shown in the paper.  
+For the UI the option to deactivate the filter and ranker were added. This can be done via setting the respective parameters to -1.
 
 ## Code Overview
 
