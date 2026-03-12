@@ -46,3 +46,13 @@ class DemoCallable(ABC):
     def third_phase_error(self, error_message: str):
         """An error occurred during the ranking phase. There will be no further function calls after this one."""
         pass
+
+    @abstractmethod
+    def parameter_check_successful(self):
+        """The parameters are valid and can be used for the rewriting."""
+        pass
+
+    @abstractmethod
+    def parameter_check_failed(self, error_msg: str):
+        """The parameters are invalid and cannot be used for rewriting."""
+        pass

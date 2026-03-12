@@ -53,7 +53,6 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     # TODO implement loading from cache?
     # TODO prune queries using non-existent table before ranking?
     # TODO if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
-    # TODO Callback Methods: Param Check ok/ Param Check not ok -> call instead of error raise for checking if table is there etc.
     # Set the config parameters
     config.db_file = ""
     config.gpt_model = gpt_model
@@ -81,22 +80,23 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     config.statistics2 = Phase2Statistics()
     config.statistics3 = Phase3Statistics()
     config.statistics4 = Phase4Statistics()
-    # Check if we have a query
-    # TODO catch following errors in UI to show error message on screen?
+    # Check if we have a query and notify UI if not
     if original_query.strip == "" or original_query is None:
-        raise config.RewritingNotPossible("Input Query is empty")
-    # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
+        demo_object.parameter_check_failed("Input Query is empty")
+    # Check if there are tables in the database, if not the rewriting on existent tables does not make sense (then UI is notified)
     if not check_existence_of_tables(False,db_file_connection):
-        raise config.RewritingNotPossible("There are no tables in the database.\nNo executable rewrite can be produced.")
-    # Check that the number of result queries is not bigger than the number of produced alternatives
+        demo_object.parameter_check_failed("There are no tables in the database. No executable rewrite can be produced.")
+    # Check that the number of result queries is not bigger than the number of produced alternatives (if not UI is notified)
     if config.num_alternatives < config.num_results:
-        raise config.RewritingNotPossible(f"Cannot output more queries ({config.num_results}) "
-                                   f"than the number of alternatives produced ({config.num_alternatives}).")
+        demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "
+                                           f"than the number of alternatives produced ({config.num_alternatives}).")
     # Set up of all needed elements
     set_up_model(config.sentence_embedder)
     # Set up the reproducibility DB
     if config.reproducibility:
         create_reproducibility_database(False)
+    # Notify the callback that check was successful
+    demo_object.parameter_check_successful()
     # Execute the workflow (after each phase it calls demo object function with right statistics)
     execute_query_rewriting([['SQL',original_query]], config.num_alternatives, config.rewrite_kind,
                             config.ranker_kind, config.num_results, config.prefilter_kind)
@@ -141,22 +141,24 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     config.statistics2 = Phase2Statistics()
     config.statistics3 = Phase3Statistics()
     config.statistics4 = Phase4Statistics()
-    # Check if we have a query
+    # Check if we have a query and notify UI if not
     if original_query.strip == "" or original_query is None:
-        raise config.RewritingNotPossible("Input Query is empty")
-    # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
+        demo_object.parameter_check_failed("Input Query is empty")
+    # Check if there are tables in the database, if not the rewriting on existent tables does not make sense (then UI is notified)
     if not check_existence_of_tables(False, db_file_connection):
-        raise config.RewritingNotPossible(
-            "There are no tables in the database.\nNo executable rewrite can be produced.")
-    # Check that the number of result queries is not bigger than the number of produced alternatives
+        demo_object.parameter_check_failed(
+            "There are no tables in the database. No executable rewrite can be produced.")
+    # Check that the number of result queries is not bigger than the number of produced alternatives (if not UI is notified)
     if config.num_alternatives < config.num_results:
-        raise config.RewritingNotPossible(f"Cannot output more queries ({config.num_results}) "
-                                          f"than the number of alternatives produced ({config.num_alternatives}).")
+        demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "
+                                           f"than the number of alternatives produced ({config.num_alternatives}).")
     # Set up of all needed elements
     set_up_model(config.sentence_embedder)
     # Set up the reproducibility DB
     if config.reproducibility:
         create_reproducibility_database(False)
+    # Notify the callback that check was successful
+    demo_object.parameter_check_successful()
     # Test calls for the callback object
     if random.uniform(0,1) < 0.1:
         config.demo_callback.first_phase_error("No tables found")
