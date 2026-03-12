@@ -6,6 +6,8 @@ import os
 import time
 from argparse import Namespace
 
+import duckdb
+
 # import sys
 import query_rewriting.config as config
 from query_rewriting.config import NotYetSupportedException, NoRewritesFoundException, RewritingNotPossible, \
@@ -204,7 +206,7 @@ def read_file(file_dir: str = config.file_input_string) -> list[list[str]]:
 
 
 def execute_query_rewriting(input_queries: list[list[str]], number_of_alternatives: int, rewrite_kind: int,
-                            ranker_kind: int, number_of_results: int, prefilter_kind: int):
+                            ranker_kind: int, number_of_results: int, prefilter_kind: int, stable_con: duckdb.DuckDBPyConnection = None):
     """
     Executes the whole workflow of the system for all input queries.
     SQL and NL inputs are treated separately using their corresponding methods.
@@ -215,6 +217,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
     :param bool ranker_kind: Defines the ranker method to be used (1 for simple ranker)
     :param int number_of_results: Number of wanted result queries (top-k queries after the ranking)
     :param int prefilter_kind: Defines the table pre-filter method to be used (1 for simple filter)
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     """
     # Count the number of rewrites that are corrected and returned (top-k)
     num_no_rewrites_found_queries: int = 0
@@ -250,7 +253,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
             possible_result: list = list()
             if config.check_executability:
                 start_time_sql = time.time()
-                query_execution_possible, possible_result = check_query_execution(query, False)
+                query_execution_possible, possible_result = check_query_execution(query, False, stable_con)
                 end_time_sql = time.time()
                 time_list_sql_check_execution.append(end_time_sql - start_time_sql)
             # Only skip query if execution possible (checked only if configured like this)
@@ -264,7 +267,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 start_time = time.time()
                 try:
                     alternative_queries, proposed_tables = rewrite_query(query, number_of_alternatives, rewrite_kind,
-                                                                         prefilter_kind)
+                                                                         prefilter_kind, stable_con)
                     end_time = time.time()
                     time_list_sql_rewrite.append(end_time - start_time)
                 except NoRewritesFoundException as e:
@@ -324,7 +327,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 # Correct the top-k rewrites and annotate uncorrected ones
                 start_time = time.time()
                 corrected_queries, error_messages, query_results, num_corrections_one_query = (
-                    query_correction_and_execution(ranked_alternative_queries, proposed_tables, num_iterations=config.num_correction_tries))  # Param from Config
+                    query_correction_and_execution(ranked_alternative_queries, proposed_tables, num_iterations=config.num_correction_tries, stable_con=stable_con))  # Param from Config
                 end_time = time.time()
                 time_list_sql_correction.append(end_time - start_time)
                 num_output_rewrites += number_of_results

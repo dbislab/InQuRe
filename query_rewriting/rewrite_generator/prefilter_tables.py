@@ -13,16 +13,17 @@ from query_rewriting.utilities.sql_parsing import extract_tables
 
 
 # tested in the main workflow
-def prefilter_tables(input_query: str, prefilter_kind: int) -> dict:
+def prefilter_tables(input_query: str, prefilter_kind: int, stable_con: duckdb.DuckDBPyConnection = None) -> dict:
     """
     Pre-filter the tables s.t. they can be given as usable tables for generating alternative queries.
 
     :param str input_query: The query which should be rewritten on the tables of the database
     :param int prefilter_kind: The kind of algorithm to use for pre-filtering
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A dictionary containing the usable tables in the form {table:[column1 type1, column2 type2]}
     :rtype: dict
     """
-    db_tables: dict = get_tables_from_db(False)
+    db_tables: dict = get_tables_from_db(False, stable_con)
     if prefilter_kind == 1:
         return simple_prefilter_via_scipy_embedding(input_query, db_tables)
     elif prefilter_kind == 2:
@@ -30,7 +31,7 @@ def prefilter_tables(input_query: str, prefilter_kind: int) -> dict:
     elif prefilter_kind == 3:
         return complex_prefilter_via_llm(input_query, db_tables)
     elif prefilter_kind == 4:
-        return prefilter_tables_via_summaries(input_query, db_tables)
+        return prefilter_tables_via_summaries(input_query, db_tables, stable_con=stable_con)
     elif prefilter_kind == -1: # No filter should be used
         return db_tables
     else:
@@ -65,7 +66,7 @@ def simple_prefilter_via_scipy_embedding(input_query: str, db_tables: dict) -> d
 #   Get all the tables found by the table filtering algorithm
 #   Look at those tables pairwise
 #   If two tables have a join using only one other table: add this table to the result
-def add_joining_tables(prefiltered_tables: dict, db_tables: dict, test: bool) -> dict:
+def add_joining_tables(prefiltered_tables: dict, db_tables: dict, test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> dict:
     """
     For the found tables from the pre-filtering, add tables that are needed to join two of these tables together.
     It is checked pairwise if both tables have a reference to the same table,
@@ -75,19 +76,24 @@ def add_joining_tables(prefiltered_tables: dict, db_tables: dict, test: bool) ->
            in the form {table:[column1 type1, column2 type2]}
     :param dict db_tables: The tables in the database in the form {table:[column1 type1, column2 type2]}
     :param bool test: Indicates if tests are currently run
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: The dictionary of prefiltered tables enhanced with the joining tables
     :rtype: dict
     """
     # Configure DB path
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
+        con = stable_con
     # Get all constraints from the database with foreign keys
-    con = duckdb.connect(path)
     constraints: list = con.execute("SELECT table_name, constraint_text "
                                     "FROM duckdb_constraints() WHERE constraint_type = 'FOREIGN KEY'").fetchall()
-    con.close()
+    if stable_con is None:
+        con.close()
     if len(constraints) == 0:
         return prefiltered_tables
     tables_names = list(zip(*constraints))[0]

@@ -27,13 +27,14 @@ total_tokens_prefilter_summary: int = 0
 
 # checked created database tuples -> look ok
 # tested only in workflow
-def prefilter_tables_via_summaries(input_query: str, db_tables: dict) -> dict:
+def prefilter_tables_via_summaries(input_query: str, db_tables: dict, stable_con: duckdb.DuckDBPyConnection = None) -> dict:
     """
     Prefilter the tables via summarizing the tables and the query in natural language.
     Similar tables are chosen using similarity metrics for the natural language descriptions.
 
     :param str input_query: The query that is used to prefilter the tables of the database
     :param dict db_tables: The tables in the database in the form {table:[column1 type1, column2 type2]}
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A dictionary containing the usable tables in the form {table:[column1 type1, column2 type2]}
     :rtype: dict
     """
@@ -44,7 +45,7 @@ def prefilter_tables_via_summaries(input_query: str, db_tables: dict) -> dict:
     if len(possible_tables_without_info) != 0:
         # There are tables without info in the metadata table
         # Compute and save info for those
-        summaries, topics, keywords = create_summaries(possible_tables_without_info, config.max_num_summaries)
+        summaries, topics, keywords = create_summaries(possible_tables_without_info, config.max_num_summaries, stable_con)
         successful_write: bool = save_tables_info(possible_tables_without_info, summaries, topics, keywords,
                                                   metadata_db_path)
         if not successful_write:
@@ -98,12 +99,13 @@ def check_for_summaries(db_tables: dict, metadata_db_path: str) -> list[str]:
 
 
 # tested only in workflow, as it makes LLM call
-def create_summaries(tables_needing_summary: list[str], max_tables_per_prompt: int = -1) -> Tuple[dict, dict, dict]:
+def create_summaries(tables_needing_summary: list[str], max_tables_per_prompt: int = -1, stable_con: duckdb.DuckDBPyConnection = None) -> Tuple[dict, dict, dict]:
     """
     Create the summaries (and more) for all available tables in the database.
 
     :param dict tables_needing_summary: The tables in the database that need a summary etc.
     :param int max_tables_per_prompt: The maximum amount of tables asked per prompt
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: 3 dictionaries: table_summaries: summaries produced for the tables of the form {table: table_summary}
                              table_topics: topics produced for the tables in the form {table: [topic1, topic2, ...]}
                              table_keywords: keywords produced for the tables in the form {table: [keyword1, ...]}
@@ -116,9 +118,13 @@ def create_summaries(tables_needing_summary: list[str], max_tables_per_prompt: i
     # Current metadata is ok -> should be checked before
     # Get the CREATE TABLE statements for all the tables from the database
     #  (database is not empty, checked at start of main method)
-    con = duckdb.connect(config.db_file)
+    if stable_con is None:
+        con = duckdb.connect(config.db_file)
+    else:
+        con = stable_con
     create_statements_list: list = con.execute("SELECT table_name, sql FROM duckdb_tables() WHERE internal=false").fetchall()
-    con.close()
+    if stable_con is None:
+        con.close()
     create_statements_dict: dict = dict(create_statements_list)
     # Slice the list into parts of the right size for the LLM
     max_output_tokens: int = 130

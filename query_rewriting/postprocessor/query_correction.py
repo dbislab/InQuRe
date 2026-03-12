@@ -21,7 +21,7 @@ completion_tokens_query_correction: int = 0
 total_tokens_query_correction: int = 0
 
 # tested in workflow for queries that need correction (not for non-correctable queries)
-def query_correction_and_execution(input_queries: list[str], usable_tables: dict, num_iterations: int = 3) \
+def query_correction_and_execution(input_queries: list[str], usable_tables: dict, num_iterations: int = 3, stable_con: duckdb.DuckDBPyConnection = None) \
         -> Tuple[list[str], list[str], list[list], int]:
     """
     Correct a list of queries. First check if each query is executable.
@@ -34,6 +34,7 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
     :param dict usable_tables: The usable tables that were selected to rewrite the query
            in the form {table:[column1 type1, column2 type2]}
     :param int num_iterations: The number of iterations done to try and correct the query (default: 3)
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: 1. A list of queries (corrected if it was correctable, original otherwise)
              2. A list of error messages (empty string if the query is executable now, the error message otherwise)
              3. A list of the results of the query (if the query was executable, otherwise the result [] is appended)
@@ -46,7 +47,7 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
     num_corrections: int = 0
     for input_query in input_queries:
         # Try for each query if it is executable
-        executable, result, correctable, error_msg = get_error_message_or_result(input_query, False)
+        executable, result, correctable, error_msg = get_error_message_or_result(input_query, False, stable_con)
         if executable:
             # The query is executable, we just add everything
             print(f"The query '{input_query}' did not need correction.")
@@ -64,8 +65,8 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
                 error_msg2: str = error_msg
                 for i in range(num_iterations):
                     # Try num_iterations times to correct the query (iteratively) and check if it was corrected
-                    corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2)
-                    executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False)
+                    corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2, stable_con)
+                    executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False, stable_con)
                     if executable2:
                         # The query is now executable, so append the corrected query,
                         # the new error message and the new result and break the loop
@@ -88,7 +89,7 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
 
 
 # is tested in workflow for queries that need correction (not for non-correctable queries)
-def gentle_self_correction(input_query: str, usable_tables: dict, error_message: str) -> str:
+def gentle_self_correction(input_query: str, usable_tables: dict, error_message: str, stable_con: duckdb.DuckDBPyConnection = None) -> str:
     """
     Uses the LLM itself (zero-shot setting) to correct one non-executable query.
     It is assumed (unlike in DinSQL) that the input query is not executable.
@@ -101,12 +102,13 @@ def gentle_self_correction(input_query: str, usable_tables: dict, error_message:
     :param dict usable_tables: Dictionary of usable tables that were selected to rewrite the query in the form
            {table:[column1 type1, column2 type2]}
     :param str error_message: The error message that was produced during the execution
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A corrected version of the query from the LLM (no guarantee to be executable)
     :rtype: str
     """
     # Get the proposed tables as string for prompt
     # Checked if Foreign Key Constraints are there
-    foreign_keys: dict = get_usable_constraints_from_db(list(usable_tables.keys()), False)
+    foreign_keys: dict = get_usable_constraints_from_db(list(usable_tables.keys()), False, stable_con)
     proposed_table_str: str = prepare_db_schema_for_prompt_including_fk(usable_tables, foreign_keys)
     # Prompt the LLM
     content_for_gpt: str = (
@@ -156,13 +158,14 @@ def gentle_self_correction(input_query: str, usable_tables: dict, error_message:
     return stripped_query
 
 
-def get_error_message_or_result(input_query: str, test: bool) -> Tuple[bool, list, bool, str]:
+def get_error_message_or_result(input_query: str, test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> Tuple[bool, list, bool, str]:
     """
     Check if the query is executable on our database and give precise errors (or results if it is executable).
     This is done in one method to avoid having to execute correct queries two times.
 
     :param str input_query: The query to check for execution
     :param bool test: indicates if tests are run currently
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A tuple including:
              1. An indicator if the query is executable
              2. The result (from .fetchall() including the columns) of the query if it was executable
@@ -173,11 +176,14 @@ def get_error_message_or_result(input_query: str, test: bool) -> Tuple[bool, lis
     :rtype: Tuple[bool, list, bool, str]
     """
     # Establish the DB connection
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
-    con = duckdb.connect(path)
+        con = stable_con
     executable: bool = True
     res: list = []
     correctable: bool = True
@@ -203,5 +209,6 @@ def get_error_message_or_result(input_query: str, test: bool) -> Tuple[bool, lis
         correctable = False
         error_msg = f"Other Exception:\n{str(e)}"
     finally:
-        con.close()
+        if stable_con is None:
+            con.close()
     return executable, res, correctable, error_msg

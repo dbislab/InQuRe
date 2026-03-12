@@ -26,21 +26,25 @@ def get_result_with_column_names(connection: DuckDBPyConnection) -> list[list]:
     return results
 
 
-def get_tables_from_db(test: bool) -> dict:
+def get_tables_from_db(test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> dict:
     """
     Get all the tables and columns existent in the database
 
     :param bool test: Indicates if tests are currently run
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A dictionary containing the tables in the form {table:[column1 type1, column2 type2]}
     :rtype: dict
     """
     db_schema: dict = dict()
     # Get all existent tables from the database
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
-    con = duckdb.connect(path)
+        con = stable_con
     db_tables_unprocessed: list = con.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
     # Fetch all table names into a single tuple
     # (throws error if no tables in DB, but this is checked at the execution start)
@@ -53,32 +57,38 @@ def get_tables_from_db(test: bool) -> dict:
         db_column_types: list = list(list(zip(*db_columns_unprocessed))[1])
         db_columns_and_type: list = [i + " " + j for i, j in zip(db_columns, db_column_types)]
         db_schema[table] = db_columns_and_type
-    con.close()
+    if stable_con is None:
+        con.close()
     # print(f"DB Schema: {db_schema}")
     return db_schema
 
 
 # Gets constraints like key relations to make it easier for LLM to make less errors
 #   (duckdb_constraints() function)
-def get_usable_constraints_from_db(rewrite_tables: list[str], test: bool) -> dict:
+def get_usable_constraints_from_db(rewrite_tables: list[str], test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> dict:
     """
     Find constraints in the database that exist between two tables used for rewriting a query.
 
     :param list[str] rewrite_tables: All the tables that are used for the rewrite of the query
     :param bool test: Indicates if tests are currently run
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A dictionary mapping from the table name to its usable foreign keys (as a list of constraint strings)
     :rtype: dict
     """
     # Set the path
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
+        con = stable_con
     # Get all constraints from the database with foreign keys
-    con = duckdb.connect(path)
     constraints: list = con.execute("SELECT table_name, constraint_text "
                                     "FROM duckdb_constraints() WHERE constraint_type = 'FOREIGN KEY'").fetchall()
-    con.close()
+    if stable_con is None:
+        con.close()
     # Return empty dict if no constraints are there
     if len(constraints) == 0:
         return dict()
@@ -103,23 +113,28 @@ def get_usable_constraints_from_db(rewrite_tables: list[str], test: bool) -> dic
     return found_mappings
 
 
-def check_existence_of_tables(test: bool) -> bool:
+def check_existence_of_tables(test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> bool:
     """
     Check if there are tables in the database.
 
     :param bool test: Indicates if tests are currently run
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: True if there are tables, false otherwise
     :rtype: bool
     """
     # Set the path
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
+        con = stable_con
     # Get the tables
-    connection = duckdb.connect(path)
-    db_tables: list = connection.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
-    connection.close()
+    db_tables: list = con.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
+    if stable_con is None:
+        con.close()
     if len(db_tables) == 0:
         return False
     else:

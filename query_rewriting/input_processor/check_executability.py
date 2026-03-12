@@ -71,23 +71,27 @@ def proposed_tables(nl_input: str) -> dict:
 
 
 
-def check_proposed_tables_exact(schema: dict, test: bool) -> Tuple[bool, dict]:
+def check_proposed_tables_exact(schema: dict, test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> Tuple[bool, dict]:
     """
     Try to find the tables suggested in the input in the database schema.
 
     :param dict schema: A dictionary of the proposed schema
     :param bool test: indicates if tests are run currently
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: True if all the tables are found, false otherwise.
              As a second return all elements from the input
              that were found in the DB schema are written in a dictionary.
     :rtype: Tuple[bool, dict]
     """
     # Get all existent tables from the database
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
-    con = duckdb.connect(path)
+        con = stable_con
     res: list = con.execute("SELECT table_name FROM duckdb_tables() WHERE internal=false").fetchall()
     existent_tables: dict = dict()
     existent_tables_count: int = 0
@@ -113,7 +117,8 @@ def check_proposed_tables_exact(schema: dict, test: bool) -> Tuple[bool, dict]:
             elif len(intersection) > 0:
                 # There are columns in the given schema that exist in the DB
                 existent_tables[table] = list(intersection)
-    con.close()
+    if stable_con is None:
+        con.close()
     if existent_tables_count == len(schema):
         # All tables were found
         return True, existent_tables
@@ -122,22 +127,26 @@ def check_proposed_tables_exact(schema: dict, test: bool) -> Tuple[bool, dict]:
         return False, existent_tables
 
 
-def check_query_execution(query_input: str, test: bool) -> Tuple[bool, list]:
+def check_query_execution(query_input: str, test: bool, stable_con: duckdb.DuckDBPyConnection = None) -> Tuple[bool, list]:
     """
     Check if the input SQL query is executable.
 
     :param str query_input: The input SQL query
     :param bool test: indicates if tests are run currently
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: True if the input SQL query is executable, false otherwise.
              If the input was executable, the result of the query is returned as well (including column names)
     :rtype: Tuple[bool, list]
     """
     # Establish the DB connection
-    if test:
-        path = config.test_db_file
+    if stable_con is None:
+        if test:
+            path = config.test_db_file
+        else:
+            path = config.db_file
+        con = duckdb.connect(path)
     else:
-        path = config.db_file
-    con = duckdb.connect(path)
+        con = stable_con
     executable: bool = True
     res: list = []  # con.sql("SELECT false").fetchall()
     try:
@@ -158,6 +167,7 @@ def check_query_execution(query_input: str, test: bool) -> Tuple[bool, list]:
         print(f"Query not executable on database. General error thrown with the message:\n{e}\n")
     finally:
         # Close the connection
-        con.close()
+        if stable_con is None:
+            con.close()
         # Return the boolean showing if the query executed without errors
         return executable, res

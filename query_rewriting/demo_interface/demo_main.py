@@ -5,6 +5,8 @@ import os
 import random
 import time
 
+import duckdb
+
 import query_rewriting.config as config
 from query_rewriting.demo_interface.demo_callable import DemoCallable
 from query_rewriting.demo_interface.phase1_statistics import Phase1Statistics
@@ -17,7 +19,8 @@ from query_rewriting.utilities.duckdb_functions import check_existence_of_tables
 from query_rewriting.utilities.reproducibility_functions import create_reproducibility_database
 
 
-def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, num_alternatives_returned: int,
+def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPyConnection,
+                        gpt_model: str, num_alternatives_returned: int,
                         additional_num_queries_produced: int, prefilter_kind: int, rewrite_kind: int,
                         ranker_kind: int, ranker_kind_string_sim: int, ranker_kind_intent_sim: int,
                         database_prefix: bool, embedding_threshold: float, sllm_percent_returned_tables: float,
@@ -27,7 +30,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     Run the rewriter with the given input from the UI.Return intermediate results via the demo_callable object.
 
     :param original_query: The query that one wants to be rewritten as a string.
-    :param db_file_path: The path to the database file (either relative or absolute) as a string.
+    :param db_file_connection: The database connection as an object from DuckDB.
     :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini.
     :param num_alternatives_returned: The number of alternative queries to be returned to the user in the end.
     :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
@@ -49,8 +52,9 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
     # TODO check for global variables/other variables that they are reset after each run!
     # TODO implement loading from cache?
     # TODO prune queries using non-existent table before ranking?
+    # TODO if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
     # Set the config parameters
-    config.db_file = db_file_path
+    config.db_file = ""
     config.gpt_model = gpt_model
     config.num_alternatives = num_alternatives_returned + additional_num_queries_produced
     config.num_results = num_alternatives_returned
@@ -87,7 +91,7 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
         print("\nWarning: The specified DB file does not exist. It will be created on the first access.")
         raise config.RewritingNotPossible("Database file not found")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
-    if not check_existence_of_tables(False):
+    if not check_existence_of_tables(False,db_file_connection):
         raise config.RewritingNotPossible("There are no tables in the database.\nNo executable rewrite can be produced.")
     # Check that the number of result queries is not bigger than the number of produced alternatives
     if config.num_alternatives < config.num_results:
@@ -104,7 +108,8 @@ def run_rewriter_for_ui(original_query: str, db_file_path: str, gpt_model: str, 
 
 
 
-def run_rewriter_for_ui_test(original_query: str, db_file_path: str, gpt_model: str, num_alternatives_returned: int,
+def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.DuckDBPyConnection,
+                             gpt_model: str, num_alternatives_returned: int,
                             additional_num_queries_produced: int, prefilter_kind: int, rewrite_kind: int,
                             ranker_kind: int, ranker_kind_string_sim: int, ranker_kind_intent_sim: int,
                             database_prefix: bool, embedding_threshold: float, sllm_percent_returned_tables: float,
@@ -115,7 +120,7 @@ def run_rewriter_for_ui_test(original_query: str, db_file_path: str, gpt_model: 
     It also returns results via the statistics objects (with wait time in between) and sometimes throws an error via randomization.
     """
     # Set the config parameters
-    config.db_file = db_file_path
+    config.db_file = ""
     config.gpt_model = gpt_model
     config.num_alternatives = num_alternatives_returned + additional_num_queries_produced
     config.num_results = num_alternatives_returned
@@ -151,7 +156,7 @@ def run_rewriter_for_ui_test(original_query: str, db_file_path: str, gpt_model: 
         print("\nWarning: The specified DB file does not exist. It will be created on the first access.")
         raise config.RewritingNotPossible("Database file not found")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
-    if not check_existence_of_tables(False):
+    if not check_existence_of_tables(False, db_file_connection):
         raise config.RewritingNotPossible(
             "There are no tables in the database.\nNo executable rewrite can be produced.")
     # Check that the number of result queries is not bigger than the number of produced alternatives

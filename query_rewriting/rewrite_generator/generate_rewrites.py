@@ -4,6 +4,8 @@ Functions for getting rewrites of the original query
 import time
 from typing import Tuple
 
+import duckdb
+
 # from openai.types.chat import ChatCompletion
 
 from query_rewriting.config import NotYetSupportedException, NoRewritesFoundException
@@ -24,7 +26,7 @@ total_tokens_query_rewriting: int = 0
 
 
 # tested in main execution method only
-def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, prefilter_kind: int) \
+def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, prefilter_kind: int, stable_con: duckdb.DuckDBPyConnection = None) \
         -> Tuple[list[str], dict]:
     """
     Produce multiple rewrites for a single query using different parameters for tuning.
@@ -33,12 +35,13 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
     :param int number_of_alternatives: The number of alternative queries to generate
     :param int rewrite_kind: Define what rewrite method to use (1 for zero-shot rewriting on the query)
     :param int prefilter_kind: Define what table filter method to use (1 for simple filter)
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: A list of the rewrites of the query and the proposed tables used for the rewrite
     :rtype: Tuple[list[str], dict]
     """
     # Get all tables from the database that could be used
     start_time_filter: float = time.time()
-    proposed_tables: dict = prefilter_tables(query, prefilter_kind)
+    proposed_tables: dict = prefilter_tables(query, prefilter_kind, stable_con)
     end_time_filter: float = time.time()
     # UI: Phase1 Statistics
     config.statistics1.runtime = end_time_filter - start_time_filter
@@ -56,10 +59,10 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
     if rewrite_kind == 1:
         # Simple zero-shot prompting should be used
         # used_function = simple_gpt_rewriting
-        result: list[str] = simple_gpt_rewriting(query, number_of_alternatives, proposed_tables)
+        result: list[str] = simple_gpt_rewriting(query, number_of_alternatives, proposed_tables, stable_con)
     elif rewrite_kind == 2:
         # First get the intent and then the rewrites
-        result: list[str] = simple_gpt_rewrite_using_nl(query, number_of_alternatives, proposed_tables)
+        result: list[str] = simple_gpt_rewrite_using_nl(query, number_of_alternatives, proposed_tables, stable_con)
     else:
         # More complex prompting should be used
         raise NotYetSupportedException(
@@ -82,19 +85,20 @@ def rewrite_query(query: str, number_of_alternatives: int, rewrite_kind: int, pr
 
 
 # tested in main execution method only
-def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_tables: dict) -> list[str]:
+def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_tables: dict, stable_con: duckdb.DuckDBPyConnection = None) -> list[str]:
     """
     Use a zero-shot approach to rewrite the query using GPT.
 
     :param str query: The query we want to rewrite
     :param int number_of_alternatives: The number of alternative queries to generate
     :param dict proposed_tables: Tables from the DB identified as usable for rewriting
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: Alternative queries produced by GPT
     :rtype: list[str]
     """
     # get the proposed tables as string for prompt
     # Check for Foreign Key Constraints
-    foreign_keys: dict = get_usable_constraints_from_db(list(proposed_tables.keys()), False)
+    foreign_keys: dict = get_usable_constraints_from_db(list(proposed_tables.keys()), False, stable_con)
     proposed_table_str: str = prepare_db_schema_for_prompt_including_fk(proposed_tables, foreign_keys)
     content_for_gpt: str = (f"I have the following SQL query:\n"
                             f"{query}\n"
@@ -150,7 +154,7 @@ def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_table
 
 
 # tested in workflow
-def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, proposed_tables: dict) -> list[str]:
+def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, proposed_tables: dict, stable_con: duckdb.DuckDBPyConnection = None) -> list[str]:
     """
     Use a zero-shot approach to rewrite the query using GPT.
     This time we first ask the LLM for the intent and then ask for queries fitting the intent.
@@ -158,13 +162,14 @@ def simple_gpt_rewrite_using_nl(query: str, number_of_alternatives: int, propose
     :param str query: The query we want to rewrite
     :param int number_of_alternatives: The number of alternative queries to generate
     :param dict proposed_tables: Tables from the DB identified as usable for rewriting
+    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
     :return: Alternative queries produced by GPT
     :rtype: list[str]
     """
     # Get the intent of the SQL query
     intent_of_query: str = llm_find_intent_sql(query)
     # Get the foreign keys from the DB and make everything into a string
-    foreign_keys: dict = get_usable_constraints_from_db(list(proposed_tables.keys()), False)
+    foreign_keys: dict = get_usable_constraints_from_db(list(proposed_tables.keys()), False, stable_con)
     proposed_table_str: str = prepare_db_schema_for_prompt_including_fk(proposed_tables, foreign_keys)
     # Make the LLM call with the right prompt
     content_for_gpt: str = (f"I have the following request deducted from a SQL query:\n"
