@@ -46,8 +46,3 @@ class DemoCallable(ABC):
     def third_phase_error(self, error_message: str):
         """An error occurred during the ranking phase. There will be no further function calls after this one."""
         pass
-
-    @abstractmethod
-    def fourth_phase_error(self, error_message: str):
-        """An error occurred during the correction phase. There will be no further function calls after this one."""
-        pass
