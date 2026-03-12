@@ -53,6 +53,7 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     # TODO implement loading from cache?
     # TODO prune queries using non-existent table before ranking?
     # TODO if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
+    # TODO Callback Methods: Param Check ok/ Param Check not ok -> call instead of error raise for checking if table is there etc.
     # Set the config parameters
     config.db_file = ""
     config.gpt_model = gpt_model
@@ -84,12 +85,6 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     # TODO catch following errors in UI to show error message on screen?
     if original_query.strip == "" or original_query is None:
         raise config.RewritingNotPossible("Input Query is empty")
-    # Check if the database exists
-    if not (os.path.isfile(config.db_file)):
-        # Results in maybe an empty DB:
-        # An empty DB does not make sense for rewriting queries
-        print("\nWarning: The specified DB file does not exist. It will be created on the first access.")
-        raise config.RewritingNotPossible("Database file not found")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
     if not check_existence_of_tables(False,db_file_connection):
         raise config.RewritingNotPossible("There are no tables in the database.\nNo executable rewrite can be produced.")
@@ -149,12 +144,6 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     # Check if we have a query
     if original_query.strip == "" or original_query is None:
         raise config.RewritingNotPossible("Input Query is empty")
-    # Check if the database exists
-    if not (os.path.isfile(config.db_file)):
-        # Results in maybe an empty DB:
-        # An empty DB does not make sense for rewriting queries
-        print("\nWarning: The specified DB file does not exist. It will be created on the first access.")
-        raise config.RewritingNotPossible("Database file not found")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense
     if not check_existence_of_tables(False, db_file_connection):
         raise config.RewritingNotPossible(
