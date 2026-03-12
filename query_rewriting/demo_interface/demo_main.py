@@ -48,11 +48,13 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     :param num_correction_tries: The maximal amount of iterations for correcting a query via the LLM. The minimum is 0 (no correction), a sensible value is 3. For more than that it can happen that the query deviates too much from the original rewrite.
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
-    # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
-    # TODO check for global variables/other variables that they are reset after each run for performance reasons?
-    # TODO implement loading from cache?
-    # TODO prune queries using non-existent table before ranking?
-    # TODO if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
+    # TODO LATER check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
+    # TODO ONLY IF NEEDED check for global variables/other variables that they are reset after each run for performance reasons? -> reset method if we run into problems only
+    # TODO LATER implement loading from cache?
+    # TODO OPTIONAL prune queries using non-existent table before ranking?
+    # TODO LATER if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
+    # TODO NOW also give statistics that are already available if phase throws an error
+    # TODO LATER also continue if too few rewrites produced/other errors that do not kill process?
     # Set the config parameters
     config.db_file = ""
     config.gpt_model = gpt_model
@@ -161,18 +163,18 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
         create_reproducibility_database(False)
     # Test calls for the callback object
     if random.uniform(0,1) < 0.1:
-        config.demo_callback.first_phase_error("No tables found")
+        demo_object.first_phase_error("No tables found")
         return
-    config.demo_callback.first_phase_done(config.statistics1)
+    demo_object.first_phase_done(config.statistics1)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
-        config.demo_callback.second_phase_error("No rewrites found")
+        demo_object.second_phase_error("No rewrites found")
         return
-    config.demo_callback.second_phase_done(config.statistics2)
+    demo_object.second_phase_done(config.statistics2)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
-        config.demo_callback.third_phase_error("TOo many queries pruned")
+        demo_object.third_phase_error("TOo many queries pruned")
         return
-    config.demo_callback.third_phase_done(config.statistics3)
+    demo_object.third_phase_done(config.statistics3)
     time.sleep(2)
-    config.demo_callback.fourth_phase_done(config.statistics4)
+    demo_object.fourth_phase_done(config.statistics4)
