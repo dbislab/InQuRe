@@ -284,10 +284,10 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                     if not config.demo_callback is None:
                         if "No tables in the database" in str(e):
                             # UI: Callback Object: Phase 1 Error
-                            config.demo_callback.first_phase_error(str(e))
+                            config.demo_callback.first_phase_error(str(e), config.statistics1)
                         else:
                             # UI: Callback Object: Phase 2 Error
-                            config.demo_callback.second_phase_error(str(e))
+                            config.demo_callback.second_phase_error(str(e), config.statistics2)
                     continue
                 # Rewrites were found
                 print(f"Alternative queries ({len(alternative_queries)}):")
@@ -303,6 +303,8 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                                                                                      ranker_kind, number_of_results)
                     end_time = time.time()
                     time_list_sql_rank.append(end_time - start_time)
+                    # UI: Phase3 Statistics
+                    config.statistics3.runtime = end_time - start_time
                 except RankingNotPossible as e:
                     # No ranking was found (the ranking did not work correctly)
                     # Skip this query
@@ -313,14 +315,13 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                           f"Continuing with the next query.")
                     num_no_rewrites_found_queries += 1
                     end_time = time.time()
+                    # UI: Phase3 Statistics
+                    config.statistics3.runtime = end_time - start_time
                     time_list_sql_rank.append(end_time - start_time)
                     # UI: Callback Object: Phase 3 Error
                     if not config.demo_callback is None:
-                        config.demo_callback.third_phase_error(str(e))
+                        config.demo_callback.third_phase_error(str(e), config.statistics3)
                     continue
-                # UI: Phase3 Statistics
-                config.statistics3.runtime = end_time - start_time
-                config.statistics3.ranked_queries = ranked_alternative_queries
                 # UI: Callback Object: Phase3 Statistics Function Call
                 if not config.demo_callback is None:
                     config.demo_callback.third_phase_done(config.statistics3)

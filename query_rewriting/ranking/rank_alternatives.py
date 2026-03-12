@@ -75,6 +75,8 @@ def rank_alternative_queries(input_request: str, alternative_queries: list[str],
         ranked_queries = random.sample(alternative_queries_pruned, output_length)
     else:
         raise NotYetSupportedException(f"Ranking queries using kind {ranker_kind} is not yet supported")
+    # UI: Phase3 Statistics
+    config.statistics3.ranked_queries = ranked_queries
     # Check if there are still enough queries after the ranking
     if len(ranked_queries) < output_length:
         raise RankingNotPossible("Too few queries were returned after the ranking.")

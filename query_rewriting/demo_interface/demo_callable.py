@@ -33,17 +33,17 @@ class DemoCallable(ABC):
         pass
 
     @abstractmethod
-    def first_phase_error(self, error_message: str):
+    def first_phase_error(self, error_message: str, statistics1: Phase1Statistics):
         """An error occurred during the filtering phase. There will be no further function calls after this one."""
         pass
 
     @abstractmethod
-    def second_phase_error(self, error_message: str):
+    def second_phase_error(self, error_message: str, statistics2: Phase2Statistics):
         """An error occurred during the rewriting phase. There will be no further function calls after this one."""
         pass
 
     @abstractmethod
-    def third_phase_error(self, error_message: str):
+    def third_phase_error(self, error_message: str, statistics3: Phase3Statistics):
         """An error occurred during the ranking phase. There will be no further function calls after this one."""
         pass
 

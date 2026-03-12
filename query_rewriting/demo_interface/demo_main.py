@@ -53,7 +53,7 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     # TODO LATER implement loading from cache?
     # TODO OPTIONAL prune queries using non-existent table before ranking?
     # TODO LATER if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
-    # TODO NOW also give statistics that are already available if phase throws an error
+    # TODO NOW also give statistics that are already available if phase throws an error, check when statistics are set!!
     # TODO LATER also continue if too few rewrites produced/other errors that do not kill process?
     # Set the config parameters
     config.db_file = ""
@@ -163,17 +163,17 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
         create_reproducibility_database(False)
     # Test calls for the callback object
     if random.uniform(0,1) < 0.1:
-        demo_object.first_phase_error("No tables found")
+        demo_object.first_phase_error("No tables found", config.statistics1)
         return
     demo_object.first_phase_done(config.statistics1)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
-        demo_object.second_phase_error("No rewrites found")
+        demo_object.second_phase_error("No rewrites found", config.statistics2)
         return
     demo_object.second_phase_done(config.statistics2)
     time.sleep(2)
     if random.uniform(0,1) < 0.1:
-        demo_object.third_phase_error("TOo many queries pruned")
+        demo_object.third_phase_error("TOo many queries pruned", config.statistics3)
         return
     demo_object.third_phase_done(config.statistics3)
     time.sleep(2)

@@ -16,7 +16,7 @@ class Phase3Statistics:
     # The number of queries that were pruned
     num_pruned_queries: int = 0 # Set in rank_alternatives
     # The current rewrites after this step (ordered)
-    ranked_queries: list[str] = list() # Set in execute_query_rewriting in main
+    ranked_queries: list[str] = list() # Set in rank_alternatives
     # All LLM prompts for the LLMS similarity function (one can be picked as an example)
     llm_prompts: list[str] = list() # Set in sql_queries_comparison for llm_intent_similarity_measure
     # All LLM answers (one can be picked as an example)
