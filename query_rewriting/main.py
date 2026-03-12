@@ -7,7 +7,7 @@ import time
 from argparse import Namespace
 
 # import sys
-import config as config
+import query_rewriting.config as config
 from query_rewriting.config import NotYetSupportedException, NoRewritesFoundException, RewritingNotPossible, \
     RankingNotPossible
 from query_rewriting.distance_measures.vector_embedding import set_up_model
