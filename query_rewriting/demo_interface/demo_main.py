@@ -49,7 +49,7 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
     # TODO check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
-    # TODO check for global variables/other variables that they are reset after each run!
+    # TODO check for global variables/other variables that they are reset after each run for performance reasons?
     # TODO implement loading from cache?
     # TODO prune queries using non-existent table before ranking?
     # TODO if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
@@ -90,13 +90,13 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     if config.num_alternatives < config.num_results:
         demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "
                                            f"than the number of alternatives produced ({config.num_alternatives}).")
+    # Notify the callback that check was successful
+    demo_object.parameter_check_successful()
     # Set up of all needed elements
     set_up_model(config.sentence_embedder)
     # Set up the reproducibility DB
     if config.reproducibility:
         create_reproducibility_database(False)
-    # Notify the callback that check was successful
-    demo_object.parameter_check_successful()
     # Execute the workflow (after each phase it calls demo object function with right statistics)
     execute_query_rewriting([['SQL',original_query]], config.num_alternatives, config.rewrite_kind,
                             config.ranker_kind, config.num_results, config.prefilter_kind)
@@ -152,13 +152,13 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     if config.num_alternatives < config.num_results:
         demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "
                                            f"than the number of alternatives produced ({config.num_alternatives}).")
+    # Notify the callback that check was successful
+    demo_object.parameter_check_successful()
     # Set up of all needed elements
     set_up_model(config.sentence_embedder)
     # Set up the reproducibility DB
     if config.reproducibility:
         create_reproducibility_database(False)
-    # Notify the callback that check was successful
-    demo_object.parameter_check_successful()
     # Test calls for the callback object
     if random.uniform(0,1) < 0.1:
         config.demo_callback.first_phase_error("No tables found")
