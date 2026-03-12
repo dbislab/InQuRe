@@ -195,13 +195,14 @@ def llm_intent_similarity_measure(input_query: str, alternative_queries: list[st
         # UI: Phase3 Statistics
         config.statistics3.llm_prompts.append(content_for_gpt)
         config.statistics3.llm_answers.append(similarity_values_str)
-        config.statistics3.input_tokens += completion["usage"]["prompt_tokens"]
-        config.statistics3.output_tokens += completion["usage"]["completion_tokens"]
         # Check tokens used
         if llm_used:
             prompt_tokens_query_comparison_t += completion["usage"]["prompt_tokens"]
             completion_tokens_query_comparison_t += completion["usage"]["completion_tokens"]
             total_tokens_query_comparison_t += completion["usage"]["total_tokens"]
+            # UI: Phase3 Statistics
+            config.statistics3.input_tokens += completion["usage"]["prompt_tokens"]
+            config.statistics3.output_tokens += completion["usage"]["completion_tokens"]
         else:
             print("No tokens used for similarity measure calculation due to reproducibility DB.")
         amount_added = 0
