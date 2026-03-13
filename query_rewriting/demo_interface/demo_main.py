@@ -162,19 +162,35 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     if config.reproducibility:
         create_reproducibility_database(False)
     # Test calls for the callback object
+    config.statistics1.llm_prompts = ["Example prompt 1", "Example prompt 2"]
+    config.statistics1.llm_answers = ["Example answer 1", "Example answer 2"]
+    config.statistics1.num_selected_tables = 3
+    config.statistics1.selected_tables = {"table1": ["column1 type1", "column2 type2"], "table2": ["column3 type3"], "table3": ["column4 type4", "column5 type5"]}
     if random.uniform(0,1) < 0.1:
         demo_object.first_phase_error("No tables found", config.statistics1)
         return
     demo_object.first_phase_done(config.statistics1)
     time.sleep(2)
+    config.statistics2.llm_prompts = ["Example prompt 1", "Example prompt 2"]
+    config.statistics2.llm_answers = ["Example answer 1", "Example answer 2"]
+    config.statistics2.num_produced_rewrites = 2
+    config.statistics2.current_rewrites = ["Example rewrite 1", "Example rewrite 2"]
     if random.uniform(0,1) < 0.1:
         demo_object.second_phase_error("No rewrites found", config.statistics2)
         return
     demo_object.second_phase_done(config.statistics2)
     time.sleep(2)
+    config.statistics3.llm_prompts = ["Example prompt 1", "Example prompt 2"]
+    config.statistics3.llm_answers = ["Example answer 1", "Example answer 2"]
+    config.statistics3.num_pruned_queries = 1
+    config.statistics3.ranked_queries = ["Example rewrite 1"]
     if random.uniform(0,1) < 0.1:
         demo_object.third_phase_error("TOo many queries pruned", config.statistics3)
         return
     demo_object.third_phase_done(config.statistics3)
     time.sleep(2)
+    config.statistics4.llm_prompts = ["Example prompt 1", "Example prompt 2"]
+    config.statistics4.llm_answers = ["Example answer 1", "Example answer 2"]
+    config.statistics4.error_messages = ["", "unexpected * in WHERE", ""]
+    config.statistics4.final_rewrites = ["Example rewrite 1", "Example rewrite 3"]
     demo_object.fourth_phase_done(config.statistics4)
