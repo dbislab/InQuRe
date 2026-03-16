@@ -192,5 +192,6 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     config.statistics4.llm_prompts = ["Example prompt 1", "Example prompt 2"]
     config.statistics4.llm_answers = ["Example answer 1", "Example answer 2"]
     config.statistics4.error_messages = ["", "unexpected * in WHERE", ""]
-    config.statistics4.final_rewrites = ["Example rewrite 1", "Example rewrite 3"]
+    config.statistics4.final_rewrites = ["Example rewrite 1", "Broken Rewrite", "Example rewrite 3"]
+    config.statistics4.results_of_final_rewrites = [[["column1", "column2"], ["value11", "value12"], ["value21", "value22"]], [], [["column1", "column2"]]]
     demo_object.fourth_phase_done(config.statistics4)
