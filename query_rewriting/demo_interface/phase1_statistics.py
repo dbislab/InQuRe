@@ -24,4 +24,11 @@ class Phase1Statistics:
 
 
     def __init__(self):
-        pass
+        self.runtime = 0
+        self.num_selected_tables = 0
+        self.selected_tables = dict()
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.sllm_num_requests_llm = 0
+        self.llm_prompts = list()
+        self.llm_answers = list()

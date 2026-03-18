@@ -28,7 +28,17 @@ class Phase4Statistics:
     llm_answers: list[str] = list() # Set in gentle_self_correction in query_correction
 
     def __init__(self):
-        pass
+        self.runtime = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.num_queries_needing_correction = 0
+        self.num_corrections_rounds_in_total = 0
+        self.num_non_correctable_queries = 0
+        self.final_rewrites = list()
+        self.error_messages = list()
+        self.results_of_final_rewrites = list()
+        self.llm_prompts = list()
+        self.llm_answers = list()
 
 
 

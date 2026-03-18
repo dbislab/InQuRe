@@ -20,4 +20,10 @@ class Phase2Statistics:
     llm_answers: list[str] = list() # Set in generate_rewrites for simple rewriting and in generate_rewrites and find_metadata for NL rewriting
 
     def __init__(self):
-        pass
+        self.runtime = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.current_rewrites = list()
+        self.num_produced_rewrites = 0
+        self.llm_prompts = list()
+        self.llm_answers = list()

@@ -4,6 +4,7 @@ Returns statistics from the rewriter after the ranking is done.
 
 class Phase3Statistics:
     # LLM is only used by the LLM-based similarity measure in this phase
+    # Only set correctly for normal ranking and MMR, difflib SQL similarity, and embedding and LLM intent similarity
 
     # Runtime in seconds
     runtime: float = 0 # Set in execute_query_rewriting in main
@@ -23,4 +24,11 @@ class Phase3Statistics:
     llm_answers: list[str] = list() # Set in sql_queries_comparison for llm_intent_similarity_measure
 
     def __init__(self):
-        pass
+        self.runtime = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.llms_num_requests_to_LLm = 0
+        self.num_pruned_queries = 0
+        self.ranked_queries = list()
+        self.llm_prompts = list()
+        self.llm_answers = list()
