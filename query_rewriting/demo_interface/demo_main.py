@@ -101,7 +101,7 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
         create_reproducibility_database(False)
     # Execute the workflow (after each phase it calls demo object function with right statistics)
     execute_query_rewriting([['SQL',original_query]], config.num_alternatives, config.rewrite_kind,
-                            config.ranker_kind, config.num_results, config.prefilter_kind)
+                            config.ranker_kind, config.num_results, config.prefilter_kind, db_file_connection)
 
 
 
