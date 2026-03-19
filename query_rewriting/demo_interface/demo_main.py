@@ -162,6 +162,8 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     if config.reproducibility:
         create_reproducibility_database(False)
     # Test calls for the callback object
+    config.statistics1.input_tokens = 1000
+    config.statistics1.output_tokens = 2000
     config.statistics1.llm_prompts = ["Example prompt 1", "Example prompt 2"]
     config.statistics1.llm_answers = ["Example answer 1", "Example answer 2"]
     config.statistics1.num_selected_tables = 3
@@ -171,6 +173,8 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
         return
     demo_object.first_phase_done(config.statistics1)
     time.sleep(2)
+    config.statistics2.input_tokens = 1000
+    config.statistics2.output_tokens = 2000
     config.statistics2.llm_prompts = ["Example prompt 1", "Example prompt 2"]
     config.statistics2.llm_answers = ["Example answer 1", "Example answer 2"]
     config.statistics2.num_produced_rewrites = 2
@@ -180,6 +184,8 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
         return
     demo_object.second_phase_done(config.statistics2)
     time.sleep(2)
+    config.statistics3.input_tokens = 1000
+    config.statistics3.output_tokens = 2000
     config.statistics3.llm_prompts = ["Example prompt 1", "Example prompt 2"]
     config.statistics3.llm_answers = ["Example answer 1", "Example answer 2"]
     config.statistics3.num_pruned_queries = 1
@@ -189,6 +195,8 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
         return
     demo_object.third_phase_done(config.statistics3)
     time.sleep(2)
+    config.statistics4.input_tokens = 1000
+    config.statistics4.output_tokens = 2000
     config.statistics4.llm_prompts = ["Example prompt 1", "Example prompt 2"]
     config.statistics4.llm_answers = ["Example answer 1", "Example answer 2"]
     config.statistics4.error_messages = ["", "unexpected * in WHERE", ""]
