@@ -31,7 +31,7 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
 
     :param original_query: The query that one wants to be rewritten as a string.
     :param db_file_connection: The database connection as an object from DuckDB.
-    :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini.
+    :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini as older models. Now, gpt-5, gpt-5.1, and gpt-5.2 also work.
     :param num_alternatives_returned: The number of alternative queries to be returned to the user in the end.
     :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
     :param prefilter_kind: The kind of table filter used by the system. 1 is for the embedding filter (E), 2 for the simple LLM filter (SLLM), and 3 for the complex LLM filter (CLLM). Set this to -1 for no filter.

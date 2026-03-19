@@ -21,6 +21,7 @@ db_file: str = os.path.join('resources','spider_with_prefixes.db')
 # Indicator if the Database has prefixes for tables from different schemas using underlines
 db_prefixes: bool = True # Should be left as is
 # The used GPT model in every API call (options: gpt-4o, gpt-4o-mini, o1-preview, o1-mini)
+# Newer version like gpt-5, gpt-5.1, gpt 5.2 also possible
 gpt_model: str = "gpt-4o-mini"
 # A test DB file for testing
 test_db_file: str = os.path.join('..','resources','test.db')
@@ -77,7 +78,7 @@ statistics4: Phase4Statistics = Phase4Statistics()
 output_length_gpt_4o: int = 16384
 # The output length available for o1-preview and o1-mini (in tokens)
 output_length_gpt_o1: int = 32768
-# The output length available for newer models (gpt-5.1, gpt-5.4) (in tokens)
+# The output length available for newer models (gpt-5 to gpt-5.4) (in tokens)
 output_length_gpt_5: int = 128000
 # The input length available for all older models (context window)
 input_length_gpt: int = 128000
