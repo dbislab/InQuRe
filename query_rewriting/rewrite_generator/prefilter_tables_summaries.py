@@ -262,13 +262,19 @@ def slice_list_of_tables_for_summaries(table_list: list[str], create_statements:
     length_create_statements: list[int] = [len(item) for item in create_statements.values()]
     avg_table_create_length: float = sum(length_create_statements) / len(length_create_statements)
     avg_table_create_tokens: float = avg_table_create_length / 4
-    # Subtract length of prompt from input length before division (roughly 300)
-    max_input_tables: int = math.floor((config.input_length_gpt - 300) / avg_table_create_tokens)
-    # get output length of models (in tokens)
+    # get input and output length of models (in tokens)
     if config.gpt_model == "gpt-4o" or config.gpt_model == "gpt-4o-mini":
         output_length: int = config.output_length_gpt_4o
-    else:
+        input_length: int = config.input_length_gpt
+    elif config.gpt_model == "o1-preview" or config.gpt_model == "o1-mini":
         output_length: int = config.output_length_gpt_o1
+        input_length: int = config.input_length_gpt
+    else:
+        output_length: int = config.output_length_gpt_5
+        input_length: int = config.input_length_gpt_new
+    # Calculate final amount of Input tables, given the input length
+    # Subtract length of prompt from input length before division (roughly 300)
+    max_input_tables: int = math.floor((input_length - 300) / avg_table_create_tokens)
     # input_tables = output_tokens/max_tokens
     max_output_tables: int = math.floor(output_length / max_tokens)
     # Minimum of tables for in- and output is taken

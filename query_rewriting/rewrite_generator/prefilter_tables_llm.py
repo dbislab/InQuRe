@@ -195,8 +195,10 @@ def get_tables_in_slices_for_llm_call(input_tables: dict, percentage_for_output:
     # get output length of models (in tokens)
     if config.gpt_model == "gpt-4o" or config.gpt_model == "gpt-4o-mini":
         output_length: int = config.output_length_gpt_4o
-    else:
+    elif config.gpt_model == "o1-preview" or config.gpt_model == "o1-mini":
         output_length: int = config.output_length_gpt_o1
+    else:
+        output_length: int = config.output_length_gpt_5
     # Assumption: maximum tables that are returned: percentage of output
     tables_per_request: int = math.floor((output_length / avg_table_length) * (1 / percentage_for_output))
     table_keys: list[str] = list(input_tables.keys())

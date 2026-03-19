@@ -77,8 +77,12 @@ statistics4: Phase4Statistics = Phase4Statistics()
 output_length_gpt_4o: int = 16384
 # The output length available for o1-preview and o1-mini (in tokens)
 output_length_gpt_o1: int = 32768
-# The input length available for all models (context window)
+# The output length available for newer models (gpt-5.1, gpt-5.4) (in tokens)
+output_length_gpt_5: int = 128000
+# The input length available for all older models (context window)
 input_length_gpt: int = 128000
+# The input length for newer models (gpt-5 to 5.2)
+input_length_gpt_new: int = 400000
 # Suffix added to the DB file name, defining the DB where metadata for this table is stored
 db_metadata_addition: str = '_metadata'
 # Name of the table for the metadata
