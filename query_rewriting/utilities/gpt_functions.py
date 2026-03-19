@@ -19,6 +19,7 @@ def gpt_api_call(used_model: str, input_message: Iterable, temperature: float = 
                  top_p: float = 1.0, seed: int = -1) -> Tuple[dict, bool]:
     """
     Function to call the GPT API.
+    Reasoning (for newer models) is not set, thus the default is used (none for 5.1 and 5.2, medium for 5).
 
     :param str used_model: The GPT model we want to use
     :param Iterable input_message: The message we want to send
