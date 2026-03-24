@@ -18,6 +18,7 @@ from query_rewriting.utilities.gpt_functions import strip_sql_output, gpt_api_ca
     prepare_db_schema_for_prompt_including_fk
 from query_rewriting.rewrite_generator.prefilter_tables import prefilter_tables
 from query_rewriting.utilities.statistics import add_rewriting_timings, add_tokens
+from query_rewriting.utilities.gpt_prompts import rewriting_simple_prompt, rewriting_simple_system
 
 # tokens used in the methods of this file
 prompt_tokens_query_rewriting: int = 0
@@ -100,7 +101,7 @@ def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_table
     # Check for Foreign Key Constraints
     foreign_keys: dict = get_usable_constraints_from_db(list(proposed_tables.keys()), False, stable_con)
     proposed_table_str: str = prepare_db_schema_for_prompt_including_fk(proposed_tables, foreign_keys)
-    content_for_gpt: str = (f"I have the following SQL query:\n"
+    '''content_for_gpt: str = (f"I have the following SQL query:\n"
                             f"{query}\n"
                             f"I do not have access to the tables needed in the query.\n"
                             f"I do have the following tables in my database "
@@ -117,6 +118,15 @@ def simple_gpt_rewriting(query: str, number_of_alternatives: int, proposed_table
     # print(f"\nPrompt for GPT:\n{content_for_gpt}\n")
     message: Iterable = [
         {"role": "system", "content": "We will work with databases and queries in SQL."},
+        {
+            "role": "user",
+            "content": content_for_gpt
+        }
+    ]
+    '''
+    content_for_gpt: str = rewriting_simple_prompt.format(query, proposed_table_str, number_of_alternatives)
+    message: Iterable = [
+        {"role": "system", "content": rewriting_simple_system},
         {
             "role": "user",
             "content": content_for_gpt
