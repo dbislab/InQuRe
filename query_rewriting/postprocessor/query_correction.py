@@ -48,8 +48,15 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
     num_corrections: int = 0
     for input_query in input_queries:
         # Try for each query if it is executable
-        with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
-            executable, result, correctable, error_msg = get_error_message_or_result(input_query, False, db_connection)
+        executable: bool = True
+        result: list = []
+        correctable: bool = True
+        error_msg: str = ""
+        if demo_object is None:
+            executable, result, correctable, error_msg = get_error_message_or_result(input_query, False)
+        else:
+            with demo_object.get_ta_context() as db_connection:
+                executable, result, correctable, error_msg = get_error_message_or_result(input_query, False, db_connection)
         if executable:
             # The query is executable, we just add everything
             print(f"The query '{input_query}' did not need correction.")
@@ -67,9 +74,15 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
                 error_msg2: str = error_msg
                 for i in range(num_iterations):
                     # Try num_iterations times to correct the query (iteratively) and check if it was corrected
-                    with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
-                        corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2, db_connection)
-                        executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False, db_connection)
+                    executable2: bool = True
+                    result2: list = []
+                    if demo_object is None:
+                        corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2)
+                        executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False)
+                    else:
+                        with demo_object.get_ta_context() as db_connection:
+                            corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2, db_connection)
+                            executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False, db_connection)
                     if executable2:
                         # The query is now executable, so append the corrected query,
                         # the new error message and the new result and break the loop

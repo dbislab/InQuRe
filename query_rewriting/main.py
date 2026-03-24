@@ -254,8 +254,11 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
             possible_result: list = list()
             if config.check_executability:
                 start_time_sql = time.time()
-                with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
-                    query_execution_possible, possible_result = check_query_execution(query, False, db_connection)
+                if demo_object is None:
+                    query_execution_possible, possible_result = check_query_execution(query, False)
+                else:
+                    with demo_object.get_ta_context() as db_connection:
+                        query_execution_possible, possible_result = check_query_execution(query, False, db_connection)
                 end_time_sql = time.time()
                 time_list_sql_check_execution.append(end_time_sql - start_time_sql)
             # Only skip query if execution possible (checked only if configured like this)
@@ -268,9 +271,14 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
                 num_queries_needing_rewrite_sql += 1
                 start_time = time.time()
                 try:
-                    with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
-                        alternative_queries, proposed_tables = rewrite_query(query, number_of_alternatives, rewrite_kind,
-                                                                             prefilter_kind, db_connection)
+                    if demo_object is None:
+                        alternative_queries, proposed_tables = rewrite_query(query, number_of_alternatives,
+                                                                             rewrite_kind,
+                                                                             prefilter_kind)
+                    else:
+                        with demo_object.get_ta_context() as db_connection:
+                            alternative_queries, proposed_tables = rewrite_query(query, number_of_alternatives, rewrite_kind,
+                                                                                prefilter_kind, db_connection)
                     end_time = time.time()
                     time_list_sql_rewrite.append(end_time - start_time)
                 except NoRewritesFoundException as e:
