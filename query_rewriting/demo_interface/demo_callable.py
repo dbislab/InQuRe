@@ -3,6 +3,9 @@ Defines the object that is called to return values to the UI during rewriting.
 """
 
 from abc import ABC, abstractmethod
+from contextlib import AbstractContextManager
+
+from duckdb import DuckDBPyConnection
 
 from query_rewriting.demo_interface.phase1_statistics import Phase1Statistics
 from query_rewriting.demo_interface.phase2_statistics import Phase2Statistics
@@ -55,4 +58,8 @@ class DemoCallable(ABC):
     @abstractmethod
     def parameter_check_failed(self, error_msg: str):
         """The parameters are invalid and cannot be used for rewriting."""
+        pass
+
+    @abstractmethod
+    def get_ta_context(self) -> AbstractContextManager[DuckDBPyConnection]:
         pass
