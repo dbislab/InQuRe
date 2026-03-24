@@ -19,7 +19,7 @@ from query_rewriting.utilities.duckdb_functions import check_existence_of_tables
 from query_rewriting.utilities.reproducibility_functions import create_reproducibility_database
 
 
-def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPyConnection,
+def run_rewriter_for_ui(original_query: str,
                         gpt_model: str, num_alternatives_returned: int,
                         additional_num_queries_produced: int, prefilter_kind: int, rewrite_kind: int,
                         ranker_kind: int, ranker_kind_string_sim: int, ranker_kind_intent_sim: int,
@@ -30,7 +30,6 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     Run the rewriter with the given input from the UI.Return intermediate results via the demo_callable object.
 
     :param original_query: The query that one wants to be rewritten as a string.
-    :param db_file_connection: The database connection as an object from DuckDB.
     :param gpt_model: The model from GPT one wants to use. Currently supported models are gpt-4o, gpt-4o-mini, o1-preview, and o1-mini as older models. Now, gpt-5, gpt-5.1, and gpt-5.2 also work.
     :param num_alternatives_returned: The number of alternative queries to be returned to the user in the end.
     :param additional_num_queries_produced: This number is added to num_alternatives_returned. The total is then the number of rewrites produced, to account for pruned queries.
@@ -86,8 +85,9 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
     if original_query.strip == "" or original_query is None:
         demo_object.parameter_check_failed("Input Query is empty")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense (then UI is notified)
-    if not check_existence_of_tables(False,db_file_connection):
-        demo_object.parameter_check_failed("There are no tables in the database. No executable rewrite can be produced.")
+    with demo_object.get_ta_context() as db_file_connection:
+        if not check_existence_of_tables(False,db_file_connection):
+            demo_object.parameter_check_failed("There are no tables in the database. No executable rewrite can be produced.")
     # Check that the number of result queries is not bigger than the number of produced alternatives (if not UI is notified)
     if config.num_alternatives < config.num_results:
         demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "
@@ -101,11 +101,11 @@ def run_rewriter_for_ui(original_query: str, db_file_connection: duckdb.DuckDBPy
         create_reproducibility_database(False)
     # Execute the workflow (after each phase it calls demo object function with right statistics)
     execute_query_rewriting([['SQL',original_query]], config.num_alternatives, config.rewrite_kind,
-                            config.ranker_kind, config.num_results, config.prefilter_kind, db_file_connection)
+                            config.ranker_kind, config.num_results, config.prefilter_kind, demo_object)
 
 
 
-def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.DuckDBPyConnection,
+def run_rewriter_for_ui_test(original_query: str,
                              gpt_model: str, num_alternatives_returned: int,
                             additional_num_queries_produced: int, prefilter_kind: int, rewrite_kind: int,
                             ranker_kind: int, ranker_kind_string_sim: int, ranker_kind_intent_sim: int,
@@ -147,9 +147,10 @@ def run_rewriter_for_ui_test(original_query: str, db_file_connection: duckdb.Duc
     if original_query.strip == "" or original_query is None:
         demo_object.parameter_check_failed("Input Query is empty")
     # Check if there are tables in the database, if not the rewriting on existent tables does not make sense (then UI is notified)
-    if not check_existence_of_tables(False, db_file_connection):
-        demo_object.parameter_check_failed(
-            "There are no tables in the database. No executable rewrite can be produced.")
+    with demo_object.get_ta_context() as db_file_connection:
+        if not check_existence_of_tables(False, db_file_connection):
+            demo_object.parameter_check_failed(
+                "There are no tables in the database. No executable rewrite can be produced.")
     # Check that the number of result queries is not bigger than the number of produced alternatives (if not UI is notified)
     if config.num_alternatives < config.num_results:
         demo_object.parameter_check_failed(f"Cannot output more queries ({config.num_results}) "

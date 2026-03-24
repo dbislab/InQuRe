@@ -10,6 +10,7 @@ from collections.abc import Iterable
 # from openai.types.chat import ChatCompletion
 
 import query_rewriting.config as config
+from query_rewriting.demo_interface.demo_callable import DemoCallable
 from query_rewriting.utilities.duckdb_functions import get_result_with_column_names, get_usable_constraints_from_db
 from query_rewriting.utilities.gpt_functions import gpt_api_call, strip_sql_output, \
     prepare_db_schema_for_prompt_including_fk
@@ -21,7 +22,7 @@ completion_tokens_query_correction: int = 0
 total_tokens_query_correction: int = 0
 
 # tested in workflow for queries that need correction (not for non-correctable queries)
-def query_correction_and_execution(input_queries: list[str], usable_tables: dict, num_iterations: int = 3, stable_con: duckdb.DuckDBPyConnection = None) \
+def query_correction_and_execution(input_queries: list[str], usable_tables: dict, num_iterations: int = 3, demo_object: DemoCallable = None) \
         -> Tuple[list[str], list[str], list[list], int]:
     """
     Correct a list of queries. First check if each query is executable.
@@ -34,7 +35,7 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
     :param dict usable_tables: The usable tables that were selected to rewrite the query
            in the form {table:[column1 type1, column2 type2]}
     :param int num_iterations: The number of iterations done to try and correct the query (default: 3)
-    :param DuckDBPyConnection stable_con: Database connection, can be used instead of the DB file path to keep one connection consistently open (set to None by default)
+    :param DemoCallable demo_object: UI object, can be used instead of the DB file path to get a Transaction context(set to None by default)
     :return: 1. A list of queries (corrected if it was correctable, original otherwise)
              2. A list of error messages (empty string if the query is executable now, the error message otherwise)
              3. A list of the results of the query (if the query was executable, otherwise the result [] is appended)
@@ -47,7 +48,8 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
     num_corrections: int = 0
     for input_query in input_queries:
         # Try for each query if it is executable
-        executable, result, correctable, error_msg = get_error_message_or_result(input_query, False, stable_con)
+        with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
+            executable, result, correctable, error_msg = get_error_message_or_result(input_query, False, db_connection)
         if executable:
             # The query is executable, we just add everything
             print(f"The query '{input_query}' did not need correction.")
@@ -65,8 +67,9 @@ def query_correction_and_execution(input_queries: list[str], usable_tables: dict
                 error_msg2: str = error_msg
                 for i in range(num_iterations):
                     # Try num_iterations times to correct the query (iteratively) and check if it was corrected
-                    corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2, stable_con)
-                    executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False, stable_con)
+                    with (None if demo_object is None else demo_object.get_ta_context()) as db_connection:
+                        corrected_query = gentle_self_correction(corrected_query, usable_tables, error_msg2, db_connection)
+                        executable2, result2, correctable2, error_msg2 = get_error_message_or_result(corrected_query, False, db_connection)
                     if executable2:
                         # The query is now executable, so append the corrected query,
                         # the new error message and the new result and break the loop
