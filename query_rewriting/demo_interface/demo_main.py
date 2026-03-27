@@ -47,13 +47,6 @@ def run_rewriter_for_ui(original_query: str,
     :param num_correction_tries: The maximal amount of iterations for correcting a query via the LLM. The minimum is 0 (no correction), a sensible value is 3. For more than that it can happen that the query deviates too much from the original rewrite.
     :param demo_object: The callable object whose functions are used to return values to the UI.
     """
-    # TODO LATER check for DDL Statements (either in Input or rewrites or both) and do not execute them (or make transactions and roll it back if tables change from that)
-    # TODO ONLY IF NEEDED check for global variables/other variables that they are reset after each run for performance reasons? -> reset method if we run into problems only
-    # TODO LATER implement loading from cache?
-    # TODO OPTIONAL prune queries using non-existent table before ranking?
-    # TODO LATER if multiple UI calls come at once: problem for different configuration with clash in config file...fix!
-    # TODO NOW also give statistics that are already available if phase throws an error, check when statistics are set!!
-    # TODO LATER also continue if too few rewrites produced/other errors that do not kill process?
     # Set the config parameters
     config.db_file = ""
     config.gpt_model = gpt_model

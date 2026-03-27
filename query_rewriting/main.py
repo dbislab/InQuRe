@@ -244,7 +244,7 @@ def execute_query_rewriting(input_queries: list[list[str]], number_of_alternativ
             # The next request is in natural language
             # NL not implemented yet
             raise NotYetSupportedException(
-                f"Natural Language Input not yet supported, request '{request_tuple[1]}' will be skipped.") #TODO support NL????
+                f"Natural Language Input not yet supported, request '{request_tuple[1]}' will be skipped.")
         elif request_tuple[0] == sql_string:
             # The next request is in SQL
             num_queries_sql += 1

@@ -55,7 +55,7 @@ def gpt_api_call(used_model: str, input_message: Iterable, temperature: float = 
             #reasoning_effort="none", #try medium for more reasoning
             messages=input_message,
             # Sets the sampling temperature between 0 and 2 (the higher, the more random; the lower, the more focused)
-            temperature=temperature, #try lower for focused (0.25), could be better for schema adherence
+            temperature=temperature, #try lower for focused (0.25), could be better for schema adherence; 0.5 could be fine
             #top_p=top_p
         )
     else:
